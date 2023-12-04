@@ -291,9 +291,9 @@ namespace DiscordStatus
         {
             return _NameFormat
                         .Replace("{NAME}", Player.PlayerName.Length > 9 ? Player.PlayerName.Substring(0, 9) : Player.PlayerName)
-                        .Replace("{KILLS}", Player.ActionTrackingServices.MatchStats.Kills.ToString())
-                        .Replace("{DEATHS}", Player.ActionTrackingServices.MatchStats.Deaths.ToString())
-                        .Replace("{ASSISTS}", Player.ActionTrackingServices.MatchStats.Assists.ToString());
+                        .Replace("{K}", Player.ActionTrackingServices.MatchStats.Kills.ToString())
+                        .Replace("{D}", Player.ActionTrackingServices.MatchStats.Deaths.ToString())
+                        .Replace("{A}", Player.ActionTrackingServices.MatchStats.Assists.ToString());
         }
         
     }
