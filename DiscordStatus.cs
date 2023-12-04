@@ -293,19 +293,8 @@ namespace DiscordStatus
                         .Replace("{NAME}", Player.PlayerName.Length > 9 ? Player.PlayerName.Substring(0, 9) : Player.PlayerName)
                         .Replace("{KILLS}", Player.ActionTrackingServices.MatchStats.Kills.ToString())
                         .Replace("{DEATHS}", Player.ActionTrackingServices.MatchStats.Deaths.ToString())
-                        .Replace("{ASSISTS}", Player.ActionTrackingServices.MatchStats.Assists.ToString())
-                        .Replace("{TEAM}", TeamTag(Player.PlayerPawn.Value.TeamNum));
+                        .Replace("{ASSISTS}", Player.ActionTrackingServices.MatchStats.Assists.ToString());
         }
         
-        public string TeamTag(int team)
-        {
-            if (team == 2)
-                return "T";
-            else if (team == 3)
-                return "CT";
-            else
-                return "SPEC";
-        }
-
     }
 }
