@@ -33,6 +33,7 @@ namespace DiscordStatus
         public override string ModuleVersion => "v1.4";
         public override string ModuleAuthor => "Tian";
         public override string ModuleDescription => "Server Status on Discord";
+        public int ModuleCOnfigVersion => 2;
         public int _UpdateIntervals;
         public string _BotToken;
         public ulong _ChannelID;
