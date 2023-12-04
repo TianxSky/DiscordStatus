@@ -1,0 +1,22 @@
+{
+  "UpdateIntervals": 60,
+  "BotToken": "puturtokoen",
+  "ChannelID": 0,
+  "MessageID": 0,
+  "MapImg": "https://elitehvh.000webhostapp.com//maps/{MAPNAME}.jpg",
+  "Title": "✡ ELITEHVH ✡",
+  "NameFormat": "{CLAN}{NAME}: KD | {KD}",
+  "phpurl": "https://elitehvh.000webhostapp.com/connect.php",
+  "EmbedColor": {
+    "R": 34,
+    "G": 139,
+    "B": 34,
+    "Random": true
+  },
+  "Map": "🗺️ Map",
+  "Online": "🌐 Online",
+  "Score": "🏆 Scoreboard",
+  "Players": "👥 Players",
+  "PlayersInline": true,
+  "Version": 1
+}
