@@ -66,7 +66,7 @@ NAME TAG FORMAT:
 ![image](https://github.com/Tian7777/DiscordStatus/assets/41808115/ba1d5075-094f-405c-8c44-326fa7d1f69d)
 
 
-
+For imageurl u can also use "https://image.gametracker.com/images/maps/160x120/csgo/{MAPNAME}.jpg"
 
 
 ### Roadmap
