@@ -30,7 +30,7 @@ namespace DiscordStatus
     public class DiscordStatus : BasePlugin, IPluginConfig<DSconfig>
     {
         public override string ModuleName => "DiscordStatus";
-        public override string ModuleVersion => "v1.1";
+        public override string ModuleVersion => "v1.2";
         public override string ModuleAuthor => "Tian";
         public DSconfig Config { get; set; } = new();
         public int _UpdateIntervals;
@@ -91,76 +91,81 @@ namespace DiscordStatus
 
         }
 
-
         public override async void Load(bool hotReload)
         {
             if (!hotReload)
             {
-                await LoadDiscordStatus();
+                if (NativeAPI.IsMapValid(NativeAPI.GetMapName()))
+                {
+                    LogHelper.LogToConsole(ConsoleColor.Green, $"[Discord Status] -> Map invalid, starting listeners!");
+                    StartListeners();
+                }
+                else {
+                    LoadDiscordStatus(NativeAPI.GetMapName());
+                    LogHelper.LogToConsole(ConsoleColor.Green, $"[Discord Status] -> Map valid, starting bot!");
+                }
                 LogHelper.LogToConsole(ConsoleColor.Green, $"[Discord Status] -> {ModuleName} version {ModuleVersion} loaded");
             }
         }
+
+        private void StartListeners()
+        {  
+            RegisterListener<Listeners.OnMapStart>(mapName =>
+            {   
+                LoadDiscordStatus(mapName);
+                LogHelper.LogToConsole(ConsoleColor.Green, $"[Discord Status] -> Map {mapName} started!");
+            });
+        }
+
         public override void Unload(bool hotReload)
         {
             LogHelper.LogToConsole(ConsoleColor.Green, $"[Discord Status] -> {ModuleName} version {ModuleVersion} unloaded");
         }
 
-        public async Task getIP()
+        private async Task LoadDiscordStatus(string mapName)
         {
-            using (HttpClient client = new HttpClient())
+            LogHelper.LogToConsole(ConsoleColor.Green, "[Discord Status] -> Trying to connect to Discord");
+            var config = new DiscordSocketConfig()
             {
-                string apiUrl = "https://api.ipify.org";
-                HttpResponseMessage response = await client.GetAsync(apiUrl);
-                response.EnsureSuccessStatusCode();
-                IPAddress = await response.Content.ReadAsStringAsync();
-                LogHelper.LogToConsole(ConsoleColor.Green, $"[Discord Status] -> Finished getting IP Address: {IPAddress}");
-            }
-        }
-        private async Task LoadDiscordStatus()
-        {
-            try
-            {
-                LogHelper.LogToConsole(ConsoleColor.Green, "[Discord Status] -> Trying to connect to Discord");
-                var config = new DiscordSocketConfig()
-                {
-                    GatewayIntents = GatewayIntents.All | GatewayIntents.MessageContent
-                };
-                _client = new DiscordSocketClient(config);
-                _client.Log += Log;
-                await _client.LoginAsync(TokenType.Bot, _BotToken);
-                await _client.StartAsync();
-                await getIP();
-                _client.Ready += async () =>
+                GatewayIntents = GatewayIntents.All | GatewayIntents.MessageContent
+            };
+            _client = new DiscordSocketClient(config);
+            _client.Log += Log;
+            await _client.LoginAsync(TokenType.Bot, _BotToken);
+            await _client.StartAsync();
+            await getIP();
+            _client.Ready += async () =>
+            {                    
+                try
                 {
                     LogHelper.LogToConsole(ConsoleColor.Green, "[Discord Status] -> Client is now Online");
-                   /*
-                    var playerEntities = Utilities.GetPlayers();
-                    PlayerCounts = 0;
-                    ctplayersName.Clear();
-                    tplayersName.Clear();
+                    /*
+                        var playerEntities = Utilities.GetPlayers();
+                        PlayerCounts = 0;
+                        ctplayersName.Clear();
+                        tplayersName.Clear();
 
-                    foreach (var player in playerEntities)
-                    {
-                        if (player.IsValid && player.PlayerPawn.IsValid && !player.IsBot && player.AuthorizedSteamID != null)
+                        foreach (var player in playerEntities)
                         {
-                            PlayerCounts++;
-                            var playerName = FormatName(player);
-                            if (player.PlayerPawn.Value.TeamNum == 2)
-                                tplayersName.Add(playerName);
-                            else
+                            if (!player.IsValid || player == null || !player.PlayerPawn.IsValid || player.IsBot) return HookResult.Handled;
                             {
-                                ctplayersName.Add(playerName);
+                                PlayerCounts++;
+                                var playerName = FormatName(player);
+                                if (player.PlayerPawn.Value.TeamNum == 2)
+                                    tplayersName.Add(playerName);
+                                else
+                                {
+                                    ctplayersName.Add(playerName);
+                                }
                             }
                         }
-
-                    }
                     */
 
                     var channel = await _client.GetChannelAsync(_ChannelID) as IMessageChannel;
 
                     if (_MessageID == 0)
                     {
-                        var message = await channel!.SendMessageAsync(embed: CreateEmbed(IPAddress, PlayerCounts, ctplayersName, tplayersName));
+                        var message = await channel!.SendMessageAsync(embed: CreateEmbed(IPAddress, PlayerCounts, ctplayersName, tplayersName, mapName));
                         var message_id = message.Id;
                         _message = message;
                         await channel!.SendMessageAsync($"Please save this message id in the config file: {message_id}");
@@ -168,35 +173,34 @@ namespace DiscordStatus
                     else
                     {
                         _message = await channel.GetMessageAsync(_MessageID) as IUserMessage;
-                        await _message.ModifyAsync(msg => msg.Embed = CreateEmbed(IPAddress, PlayerCounts, ctplayersName, tplayersName));
+                        await _message.ModifyAsync(msg => msg.Embed = CreateEmbed(IPAddress, PlayerCounts, ctplayersName, tplayersName, mapName));
                     }
                     LogHelper.LogToConsole(ConsoleColor.Green, "[Discord Status] -> Finished initializing Message");
                     _update = new System.Timers.Timer(TimeSpan.FromSeconds(_UpdateIntervals).TotalMilliseconds);
                     _update.Elapsed += async (sender, e) => await UpdateEmbed(sender, e).ConfigureAwait(false);
                     _update.Start();
-                };
-            }
-            catch (Exception ex)
-            {
-                LogHelper.LogToConsole(ConsoleColor.Green, "[Discord Status] -> " + ex.Message);
-            }
+                }
+                catch (Exception ex)
+                {
+                    LogHelper.LogToConsole(ConsoleColor.Green, "[Discord Status] -> " + ex.Message);
+                }
+            };   
         }
-
 
         private Task Log(LogMessage arg)
         {
-            Console.WriteLine(arg);
+            LogHelper.LogToConsole(ConsoleColor.Green, $"[Discord Status] -> {arg.Message}");
             return Task.CompletedTask;
         }
 
-        public Embed CreateEmbed(string IPAddress, int PlayerCounts, List<string> ctplayersName, List<string> tplayersName)
+        public Embed CreateEmbed(string IPAddress, int PlayerCounts, List<string> ctplayersName, List<string> tplayersName, string mapName)
         {
             string connectUrl = String.Concat(_phpurl, $"?ip={IPAddress}:{ConVar.Find("hostport")!.GetPrimitiveValue<int>().ToString()}");               
             if (PlayerCounts > 0)
             {
                 var builder = new EmbedBuilder()
                     .WithTitle(_Title)
-                    .AddField(_Map, $"```{NativeAPI.GetMapName()}```", inline: true)
+                    .AddField(_Map, $"```{mapName}```", inline: true)
                     .AddField(_Online, $"```{PlayerCounts}/{Server.MaxPlayers}```", inline: true)
                     .AddField("---------------------------------------------------", "ㅤ")
                     .AddField($"ㅤCT : {GetScore(CsTeam.CounterTerrorist)}", $"```ansi\r\n\u001b[0;34m{string.Join("\n", ctplayersName)}\u001b[0;0m\r\n```", inline: true)
@@ -211,7 +215,7 @@ namespace DiscordStatus
             {
                 var builder = new EmbedBuilder()
                     .WithTitle(_Title)
-                    .AddField(_Map, $"```{NativeAPI.GetMapName()}```", inline: true)
+                    .AddField(_Map, $"```{mapName}```", inline: true)
                     .AddField(_Online, "```ansi\n[2;33m[2;31mServer Empty[0m[2;33m[0m[2;33m[0m\n```", inline: true)
                     .AddField("ㅤ", !string.IsNullOrWhiteSpace(_phpurl) ? $"[**`connect {IPAddress}:{ConVar.Find("hostport")!.GetPrimitiveValue<int>().ToString()}`**]({connectUrl})ㅤ👈 Join Here" : $"**`connect {ConVar.Find("ip")!.StringValue}:{ConVar.Find("hostport")!.GetPrimitiveValue<int>().ToString()}`**ㅤ👈 Join Here")
                     .WithImageUrl(_MapImg.Replace("{MAPNAME}", NativeAPI.GetMapName()))
@@ -247,26 +251,31 @@ namespace DiscordStatus
             PlayerCounts = 0;
             tplayersName.Clear();
             ctplayersName.Clear();
+            
+            var validPlayers = playerEntities
+                .Where(player => player.IsValid && player.PlayerPawn.IsValid && !player.IsBot);
 
-            foreach (var player in playerEntities)
+            var sortedPlayers = validPlayers
+                .OrderByDescending(player => player.ActionTrackingServices.MatchStats.Kills);
+
+            foreach (var player in sortedPlayers)
             {
-                if (player.IsValid && player.PlayerPawn.IsValid && !player.IsBot)
-                {
-                    PlayerCounts++;
-                    var playerName = FormatName(player);
-                    if (player.PlayerPawn.Value.TeamNum == 2)
-                            tplayersName.Add(playerName);
-                    else if (player.PlayerPawn.Value.TeamNum == 3)
-                            ctplayersName.Add(playerName);
-                }       
+                var playerName = await FormatNameAsync(player);
+                PlayerCounts++;
+                if (player.PlayerPawn.Value.TeamNum == 2)
+                    tplayersName.Add(playerName);
+                else if (player.PlayerPawn.Value.TeamNum == 3)
+                    ctplayersName.Add(playerName);
             }
+
 
             if (_client != null && _message != null)
             {
                 var channel = _client.GetChannel(_ChannelID) as SocketTextChannel;
+                var mapName = NativeAPI.GetMapName();
                 if (channel != null)
                 {
-                    await _message.ModifyAsync(msg => { msg.Embed = CreateEmbed(IPAddress, PlayerCounts, ctplayersName, tplayersName); return; });
+                    await _message.ModifyAsync(msg => { msg.Embed = CreateEmbed(IPAddress, PlayerCounts, ctplayersName, tplayersName, mapName); return; });
                 }
             }
             LogHelper.LogToConsole(ConsoleColor.Green, "[Discord Status] -> Finished Updating Embed");
@@ -287,14 +296,99 @@ namespace DiscordStatus
             return 0;
         }
 
-        public string FormatName(CCSPlayerController? Player)
+        public async Task<string> FormatNameAsync(CCSPlayerController? Player)
         {
+            if (!Player.IsValid || Player == null || !Player.PlayerPawn.IsValid || Player.IsBot) return "";
+            string RC = await GetRegionCodeAsync(Player.IpAddress.Split(':')[0]);
+            int kills = Player.ActionTrackingServices.MatchStats.Kills;
+            int deaths = Player.ActionTrackingServices.MatchStats.Deaths;
+            string kdRatio = deaths != 0 ? (kills / (double)deaths).ToString("G2") : kills.ToString();
+
             return _NameFormat
-                        .Replace("{NAME}", Player.PlayerName.Length > 9 ? Player.PlayerName.Substring(0, 9) : Player.PlayerName)
-                        .Replace("{K}", Player.ActionTrackingServices.MatchStats.Kills.ToString())
-                        .Replace("{D}", Player.ActionTrackingServices.MatchStats.Deaths.ToString())
-                        .Replace("{A}", Player.ActionTrackingServices.MatchStats.Assists.ToString());
+                .Replace("{NAME}", Player.PlayerName.Length > 9 ? Player.PlayerName.Substring(0, 9) : Player.PlayerName)
+                .Replace("{K}", kills.ToString())
+                .Replace("{D}", deaths.ToString())
+                .Replace("{A}", Player.ActionTrackingServices.MatchStats.Assists.ToString())
+                .Replace("{KD}", kdRatio)
+                .Replace("{CLAN}", Player.Clan)
+                .Replace("{RC}", RC);
+        }
+
+        public async Task getIP()
+        {
+            using (HttpClient client = new HttpClient())
+            {
+                string apiUrl = "https://api.ipify.org";
+                HttpResponseMessage response = await client.GetAsync(apiUrl);
+                response.EnsureSuccessStatusCode();
+                IPAddress = await response.Content.ReadAsStringAsync();
+                LogHelper.LogToConsole(ConsoleColor.Green, $"[Discord Status] -> Finished getting IP Address: {IPAddress}");
+            }
         }
         
+        static async Task<string> GetRegionCodeAsync(string ipAddress)
+        {
+            string apiUrl = $"https://ipapi.co/{ipAddress}/region_code/";
+
+            using (HttpClient client = new HttpClient())
+            {
+                try
+                {
+                    string response = await client.GetStringAsync(apiUrl);
+                    return response.Trim();
+                }
+                catch (HttpRequestException ex)
+                {
+                    // Handle the exception appropriately
+                    Console.WriteLine($"Error: {ex.Message}");
+                    return "Error";
+                }
+            }
+        }
+        
+        /*
+        public async Task<string> GetRegionCodeAsync(string apiKey, string ipAddress)
+        {
+            string apiUrl = $"http://ipinfo.io/{ipAddress}/json?token={apiKey}";
+
+            using (HttpClient client = new HttpClient())
+            {
+                try
+                {
+                    string response = await client.GetStringAsync(apiUrl);
+                    JObject jsonResponse = JObject.Parse(response);
+
+                    // Extract the region code (adjust key based on actual JSON structure)
+                    string regionCode = jsonResponse["region"]?.ToString();
+
+                    return regionCode?.Trim() ?? "N/A";
+                }
+                catch (HttpRequestException ex)
+                {
+                    LogHelper.LogToConsole(ConsoleColor.Red, $"[Discord Status] -> Failed to get region code: {ex.Message}");
+                    return "Error";
+                }
+            }
+        }
+        */
+
+        /*private HookResult EventGameEnd(EventGameEnd @event, GameEventInfo info)
+        {
+            _countRounds++;
+            var maxrounds = ConVar.Find("mp_maxrounds").GetPrimitiveValue<int>();
+            if (_countRounds == (maxrounds - _config.VotingRoundInterval))
+            {
+                VoteMap(false);
+            }
+            else if (_countRounds == maxrounds)
+            {
+                Server.ExecuteCommand(!IsWsMaps(_selectedMap)
+                    ? $"map {_selectedMap}"
+                    : $"ds_workshop_changelevel {_selectedMap}");
+            }
+
+            return HookResult.Continue;
+        }
+        */
     }
 }
