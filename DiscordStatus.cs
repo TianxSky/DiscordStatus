@@ -52,7 +52,7 @@ namespace DiscordStatus
         private System.Timers.Timer _update;
         private DiscordSocketClient _client;
         private IUserMessage _message;
-        private int countPlayers = 0;
+        private int PlayerCounts = 0;
         List<string> tplayersName = new List<string>();
         List<string> ctplayersName = new List<string>();
 
@@ -135,7 +135,7 @@ namespace DiscordStatus
                     LogHelper.LogToConsole(ConsoleColor.Green, "[Discord Status] -> Client is now Online");
                    /*
                     var playerEntities = Utilities.GetPlayers();
-                    countPlayers = 0;
+                    PlayerCounts = 0;
                     ctplayersName.Clear();
                     tplayersName.Clear();
 
@@ -143,7 +143,7 @@ namespace DiscordStatus
                     {
                         if (player.IsValid && player.PlayerPawn.IsValid && !player.IsBot && player.AuthorizedSteamID != null)
                         {
-                            countPlayers++;
+                            PlayerCounts++;
                             var playerName = FormatName(player);
                             if (player.PlayerPawn.Value.TeamNum == 2)
                                 tplayersName.Add(playerName);
@@ -160,7 +160,7 @@ namespace DiscordStatus
 
                     if (_MessageID == 0)
                     {
-                        var message = await channel!.SendMessageAsync(embed: CreateEmbed(IPAddress, countPlayers, ctplayersName, tplayersName));
+                        var message = await channel!.SendMessageAsync(embed: CreateEmbed(IPAddress, PlayerCounts, ctplayersName, tplayersName));
                         var message_id = message.Id;
                         _message = message;
                         await channel!.SendMessageAsync($"Please save this message id in the config file: {message_id}");
@@ -168,7 +168,7 @@ namespace DiscordStatus
                     else
                     {
                         _message = await channel.GetMessageAsync(_MessageID) as IUserMessage;
-                        await _message.ModifyAsync(msg => msg.Embed = CreateEmbed(IPAddress, countPlayers, ctplayersName, tplayersName));
+                        await _message.ModifyAsync(msg => msg.Embed = CreateEmbed(IPAddress, PlayerCounts, ctplayersName, tplayersName));
                     }
                     LogHelper.LogToConsole(ConsoleColor.Green, "[Discord Status] -> Finished initializing Message");
                     _update = new System.Timers.Timer(TimeSpan.FromSeconds(_UpdateIntervals).TotalMilliseconds);
@@ -189,16 +189,16 @@ namespace DiscordStatus
             return Task.CompletedTask;
         }
 
-        public Embed CreateEmbed(string IPAddress, int countPlayers, List<string> ctplayersName, List<string> tplayersName)
+        public Embed CreateEmbed(string IPAddress, int PlayerCounts, List<string> ctplayersName, List<string> tplayersName)
         {
             string connectUrl = String.Concat(_phpurl, $"?ip={IPAddress}:{ConVar.Find("hostport")!.GetPrimitiveValue<int>().ToString()}");               
-            if (countPlayers > 0)
+            if (PlayerCounts > 0)
             {
                 var builder = new EmbedBuilder()
                     .WithTitle(_Title)
                     .AddField(_Map, $"```{NativeAPI.GetMapName()}```", inline: true)
-                    .AddField(_Online, $"```{countPlayers}/{Server.MaxPlayers}```", inline: true)
-                    .AddField("------------------------------------------------------", "ㅤ")
+                    .AddField(_Online, $"```{PlayerCounts}/{Server.MaxPlayers}```", inline: true)
+                    .AddField("---------------------------------------------------", "ㅤ")
                     .AddField($"ㅤCT : {GetScore(CsTeam.CounterTerrorist)}", $"```ansi\r\n\u001b[0;34m{string.Join("\n", ctplayersName)}\u001b[0;0m\r\n```", inline: true)
                     .AddField($"ㅤT : {GetScore(CsTeam.Terrorist)}", $"```ansi\r\n\u001b[0;33m{string.Join("\n", tplayersName)}\u001b[0;0m\r\n```", inline: true)
                     .AddField("ㅤ", !string.IsNullOrWhiteSpace(_phpurl) ? $"[**`connect {IPAddress}:{ConVar.Find("hostport")!.GetPrimitiveValue<int>().ToString()}`**]({connectUrl})ㅤ👈 Join Here" : $"**`connect {ConVar.Find("ip")!.StringValue}:{ConVar.Find("hostport")!.GetPrimitiveValue<int>().ToString()}`**ㅤ👈 Join Here")
@@ -244,7 +244,7 @@ namespace DiscordStatus
         {
             LogHelper.LogToConsole(ConsoleColor.Green, "[Discord Status] -> Updating Embed");
             var playerEntities = Utilities.GetPlayers();
-            countPlayers = 0;
+            PlayerCounts = 0;
             tplayersName.Clear();
             ctplayersName.Clear();
 
@@ -252,7 +252,7 @@ namespace DiscordStatus
             {
                 if (player.IsValid && player.PlayerPawn.IsValid && !player.IsBot)
                 {
-                    countPlayers++;
+                    PlayerCounts++;
                     var playerName = FormatName(player);
                     if (player.PlayerPawn.Value.TeamNum == 2)
                             tplayersName.Add(playerName);
@@ -266,7 +266,7 @@ namespace DiscordStatus
                 var channel = _client.GetChannel(_ChannelID) as SocketTextChannel;
                 if (channel != null)
                 {
-                    await _message.ModifyAsync(msg => { msg.Embed = CreateEmbed(IPAddress, countPlayers, ctplayersName, tplayersName); return; });
+                    await _message.ModifyAsync(msg => { msg.Embed = CreateEmbed(IPAddress, PlayerCounts, ctplayersName, tplayersName); return; });
                 }
             }
             LogHelper.LogToConsole(ConsoleColor.Green, "[Discord Status] -> Finished Updating Embed");
