@@ -23,7 +23,8 @@ This CSSharp plugin allows monitoring server status from discord with cute embed
 - Configurable update intervals to release serverloads
 
 ## Config
-```{
+```json
+{
   "UpdateIntervals": 60,
   "BotToken": "puturtokoen",
   "ChannelID": 0,
