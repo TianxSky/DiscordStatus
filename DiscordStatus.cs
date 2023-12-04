@@ -30,7 +30,7 @@ namespace DiscordStatus
     public class DiscordStatus : BasePlugin, IPluginConfig<DSconfig>
     {
         public override string ModuleName => "DiscordStatus";
-        public override string ModuleVersion => "v1.3";
+        public override string ModuleVersion => "v1.4";
         public override string ModuleAuthor => "Tian";
         public override string ModuleDescription => "Server Status on Discord";
         public int _UpdateIntervals;
@@ -52,6 +52,7 @@ namespace DiscordStatus
         public string _Online;
         public string _Score;
         public string _Players; 
+        public bool _PlayersInline;
         public string IPAddress { get; private set; }
         public int PlayerCounts = 0;
 
@@ -60,7 +61,7 @@ namespace DiscordStatus
 
         public void OnConfigParsed(DSconfig config)
         {
-            LogHelper.LogToConsole(ConsoleColor.Green, "[Discord Status] -> Loading config file");
+            LogHelper.LogToConsole(ConsoleColor.Magenta, "[Discord Status] -> Loading config file");
             this.Config = config;
             this._UpdateIntervals = config.UpdateIntervals;
             this._BotToken = config.BotToken;
@@ -70,6 +71,7 @@ namespace DiscordStatus
             this._Title = config.Title;
             this._NameFormat = config.NameFormat;
             this._phpurl = config.phpurl;
+            this._PlayersInline = config.PlayersInline;
             this._EmbedColor = new EmbedColorConfig
             {
                 R = config.EmbedColor.R,
@@ -81,7 +83,7 @@ namespace DiscordStatus
             this._Online = config.Online;
             this._Score = config.Score;
             this._Players = config.Players;
-            LogHelper.LogToConsole(ConsoleColor.Green, "[Discord Status] -> Finished Loading config file");
+            LogHelper.LogToConsole(ConsoleColor.Magenta, "[Discord Status] -> Finished Loading config file");
         }
 
         public class EmbedColorConfig
@@ -93,20 +95,54 @@ namespace DiscordStatus
 
         }
 
+       public class MessageIdManager
+        {
+            private readonly string FilePath;
+            private readonly string FileDir;
+            private readonly DiscordStatus _discordStatus;
+            private readonly ulong _msgid;
+
+            public MessageIdManager(DiscordStatus discordStatus, ulong msgid)
+            {
+                _msgid = msgid;
+                _discordStatus = discordStatus;
+                // Get the parent directory of the current directory (going up one level)
+                string parentDirectory = Directory.GetParent(Directory.GetParent(_discordStatus.ModuleDirectory).FullName)?.FullName;
+                // Combine the parent directory with the desired subdirectory
+                FileDir = Path.Combine(parentDirectory, @"configs/plugins/DiscordStatus");
+                FilePath = Path.Combine(FileDir, "DiscordStatus.json");
+            }
+
+            public void SaveConfig()
+            {
+                LogHelper.LogToConsole(ConsoleColor.Magenta, "[Discord Status] -> Saving MessageID to config");
+                var json = File.ReadAllText(FilePath);
+                var ReadconfigData = JsonConvert.DeserializeObject<DSconfig>(json);
+                ReadconfigData.MessageID = _msgid;
+                var updatedJson = JsonConvert.SerializeObject(ReadconfigData, Formatting.Indented);
+                File.WriteAllText(FilePath, updatedJson);
+                
+            }
+        }
+
         public override async void Load(bool hotReload)
         {
             if (!hotReload)
             {
                 if (NativeAPI.IsMapValid(NativeAPI.GetMapName()))
                 {
-                    LogHelper.LogToConsole(ConsoleColor.Green, $"[Discord Status] -> Map invalid, starting listeners!");
+                    LogHelper.LogToConsole(ConsoleColor.Magenta, $"[Discord Status] -> Map invalid, starting listeners!");
                     StartListeners();
                 }
                 else {
                     LoadDiscordStatusAsync(NativeAPI.GetMapName());
-                    LogHelper.LogToConsole(ConsoleColor.Green, $"[Discord Status] -> Map valid, starting bot!");
+                    LogHelper.LogToConsole(ConsoleColor.Magenta, $"[Discord Status] -> Map valid, starting bot!");
                 }
-                LogHelper.LogToConsole(ConsoleColor.Green, $"[Discord Status] -> {ModuleName} version {ModuleVersion} loaded");
+                LogHelper.LogToConsole(ConsoleColor.Magenta, $"[Discord Status] -> {ModuleName} version {ModuleVersion} loaded");
+            }
+            else {                
+                LoadDiscordStatusAsync(NativeAPI.GetMapName());
+                LogHelper.LogToConsole(ConsoleColor.Magenta, $"[Discord Status] -> Hot Reloading, try starting bot!");
             }
         }
 
@@ -115,18 +151,27 @@ namespace DiscordStatus
             RegisterListener<Listeners.OnMapStart>(mapName =>
             {   
                 LoadDiscordStatusAsync(mapName);
-                LogHelper.LogToConsole(ConsoleColor.Green, $"[Discord Status] -> Map {mapName} started!");
+                LogHelper.LogToConsole(ConsoleColor.Magenta, $"[Discord Status] -> Map {mapName} started!");
             });
         }
 
         public override void Unload(bool hotReload)
         {
-            LogHelper.LogToConsole(ConsoleColor.Green, $"[Discord Status] -> {ModuleName} version {ModuleVersion} unloaded");
+            //tossing everything to trashcan, shit better work
+            _update?.Stop();
+            _update?.Dispose();
+                if (_client != null)
+            {
+                _client.StopAsync().Wait(); 
+                _client.Log -= Log; 
+                _client.Dispose(); 
+            }
+            LogHelper.LogToConsole(ConsoleColor.Magenta, $"[Discord Status] -> {ModuleName} version {ModuleVersion} unloaded");
         }
 
         private async Task LoadDiscordStatusAsync(string mapName)
         {
-            LogHelper.LogToConsole(ConsoleColor.Green, "[Discord Status] -> Trying to connect to Discord");
+            LogHelper.LogToConsole(ConsoleColor.Magenta, "[Discord Status] -> Trying to connect to Discord");
             var config = new DiscordSocketConfig()
             {
                 GatewayIntents = GatewayIntents.All | GatewayIntents.MessageContent
@@ -140,54 +185,40 @@ namespace DiscordStatus
             {                    
                 try
                 {
-                    LogHelper.LogToConsole(ConsoleColor.Green, "[Discord Status] -> Client is now Online");
-                    /*
-                        foreach (var player in players)
-                        {
-                            if (!player.IsValid || player == null || !player.PlayerPawn.IsValid || player.IsBot)
-                            {
-                                var playerName = FormatName(player);
-                                if (player.PlayerPawn.Value.TeamNum == 2)
-                                    tplayersName.Add(playerName);
-                                else
-                                {
-                                    ctplayersName.Add(playerName);
-                                }
-                            }
-                        }
-                    */
-
+                    LogHelper.LogToConsole(ConsoleColor.Magenta, "[Discord Status] -> Client is now Online");
                     var channel = await _client.GetChannelAsync(_ChannelID) as IMessageChannel;
                     var players = Utilities.GetPlayers();
                     await SortPlayers(players);
 
                     if (_MessageID == 0)
                     {
+                        LogHelper.LogToConsole(ConsoleColor.Red, "[Discord Status] -> Message ID is 0, creating new message");
                         var message = await channel!.SendMessageAsync(embed: CreateEmbed(IPAddress, tplayersName, ctplayersName, mapName));
-                        var message_id = message.Id;
                         _message = message;
-                        await channel!.SendMessageAsync($"Please save this message id in the config file: {message_id}");
+                        var messageIdManager = new MessageIdManager(this, message.Id);
+                        messageIdManager.SaveConfig();
+
                     }
                     else
                     {
                         _message = await channel.GetMessageAsync(_MessageID) as IUserMessage;
                         await _message.ModifyAsync(msg => msg.Embed = CreateEmbed(IPAddress, tplayersName, ctplayersName, mapName));
                     }
-                    LogHelper.LogToConsole(ConsoleColor.Green, "[Discord Status] -> Finished initializing Message");
+                    LogHelper.LogToConsole(ConsoleColor.Magenta, "[Discord Status] -> Finished initializing Message");
                     _update = new System.Timers.Timer(TimeSpan.FromSeconds(_UpdateIntervals).TotalMilliseconds);
                     _update.Elapsed += async (sender, e) => UpdateEmbed(sender, e).ConfigureAwait(false);
                     _update.Start();
                 }
                 catch (Exception ex)
                 {
-                    LogHelper.LogToConsole(ConsoleColor.Green, "[Discord Status] -> " + ex.Message);
+                    LogHelper.LogToConsole(ConsoleColor.Magenta, "[Discord Status] -> " + ex.Message);
                 }
             };   
         }
 
         private Task Log(LogMessage arg)
         {
-            LogHelper.LogToConsole(ConsoleColor.Green, $"[Discord Status] -> {arg.Message}");
+            LogHelper.LogToConsole(ConsoleColor.Magenta, $"[Discord Status] -> discord says:{arg.Message}");
             return Task.CompletedTask;
         }
 
@@ -203,8 +234,8 @@ namespace DiscordStatus
                     .AddField(_Map, $"```{mapName}```", inline: true)
                     .AddField(_Online, $"```{PlayerCounts}/{Server.MaxPlayers}```", inline: true)
                     .AddField("---------------------------------------------------", "ㅤ")
-                    .AddField($"ㅤCT : {GetScore(CsTeam.CounterTerrorist)}", $"```ansi\r\n\u001b[0;34m{string.Join("\n", ctplayersName)}\u001b[0;0m\r\n```", inline: true)
-                    .AddField($"ㅤT : {GetScore(CsTeam.Terrorist)}", $"```ansi\r\n\u001b[0;33m{string.Join("\n", tplayersName)}\u001b[0;0m\r\n```", inline: true)
+                    .AddField($"ㅤCT : {GetScore(CsTeam.CounterTerrorist)}", $"```ansi\r\n\u001b[0;34m{string.Join("\n", ctplayersName)}\u001b[0;0m\r\n```", inline: _PlayersInline)
+                    .AddField($"ㅤT : {GetScore(CsTeam.Terrorist)}", $"```ansi\r\n\u001b[0;33m{string.Join("\n", tplayersName)}\u001b[0;0m\r\n```", inline: _PlayersInline)
                     .AddField("ㅤ", !string.IsNullOrWhiteSpace(_phpurl) ? $"[**`connect {IPAddress}:{ConVar.Find("hostport")!.GetPrimitiveValue<int>().ToString()}`**]({connectUrl})ㅤ👈 Join Here" : $"**`connect {ConVar.Find("ip")!.StringValue}:{ConVar.Find("hostport")!.GetPrimitiveValue<int>().ToString()}`**ㅤ👈 Join Here")
                     .WithImageUrl(_MapImg.Replace("{MAPNAME}", NativeAPI.GetMapName()))
                     .WithColor(GetEmbedColor())
@@ -246,7 +277,6 @@ namespace DiscordStatus
 
         private async Task UpdateEmbed(object sender, ElapsedEventArgs e)
         {
-            LogHelper.LogToConsole(ConsoleColor.Green, "[Discord Status] -> Updating Embed");
             var players = Utilities.GetPlayers();
             if (_client != null && _message != null)
             {
@@ -258,7 +288,7 @@ namespace DiscordStatus
                     await _message.ModifyAsync(msg => msg.Embed = CreateEmbed(IPAddress, tplayersName, ctplayersName, mapName));
                 }
             }
-            LogHelper.LogToConsole(ConsoleColor.Green, "[Discord Status] -> Finished Updating Embed");
+            LogHelper.LogToConsole(ConsoleColor.Magenta, "[Discord Status] -> Updated Embed");
         }
 
         public int GetScore(CsTeam team)
@@ -301,7 +331,8 @@ namespace DiscordStatus
 
         public async Task<string> FormatNameAsync(CCSPlayerController? Player)
         {
-            string RC = await GetRegionCodeAsync(Player.IpAddress.Split(':')[0]);
+            string RegionCode = await GetRegionCodeAsync(Player.IpAddress.Split(':')[0]);
+            string CountryCode = await GetCountryCodeAsync(Player.IpAddress.Split(':')[0]);
             int kills = Player.ActionTrackingServices.MatchStats.Kills;
             int deaths = Player.ActionTrackingServices.MatchStats.Deaths;
             string kdRatio = deaths != 0 ? (kills / (double)deaths).ToString("G2") : kills.ToString();
@@ -313,7 +344,8 @@ namespace DiscordStatus
                 .Replace("{A}", Player.ActionTrackingServices.MatchStats.Assists.ToString())
                 .Replace("{KD}", kdRatio)
                 .Replace("{CLAN}", Player.Clan)
-                .Replace("{RC}", RC);
+                .Replace("{CC}", CountryCode)
+                .Replace("{RC}", RegionCode);
         }
 
         public async Task getIP()
@@ -324,7 +356,7 @@ namespace DiscordStatus
                 HttpResponseMessage response = await client.GetAsync(apiUrl);
                 response.EnsureSuccessStatusCode();
                 IPAddress = await response.Content.ReadAsStringAsync();
-                LogHelper.LogToConsole(ConsoleColor.Green, $"[Discord Status] -> Finished getting IP Address: {IPAddress}");
+                LogHelper.LogToConsole(ConsoleColor.Magenta, $"[Discord Status] -> Finished getting IP Address: {IPAddress}");
             }
         }
         
@@ -347,7 +379,27 @@ namespace DiscordStatus
                 }
             }
         }
-        /*
+        //when im not lazy i make these 2 into one
+        static async Task<string> GetCountryCodeAsync(string ipAddress)
+        {
+            string apiUrl = $"https://ipapi.co/{ipAddress}/country_code/";
+
+            using (HttpClient client = new HttpClient())
+            {
+                try
+                {
+                    string response = await client.GetStringAsync(apiUrl);
+                    return response.Trim();
+                }
+                catch (HttpRequestException ex)
+                {
+                    // Handle the exception appropriately
+                    Console.WriteLine($"Error: {ex.Message}");
+                    return "Error";
+                }
+            }
+        }
+        /* alternative api for getting region code but i dont wanna use it
         public async Task<string> GetRegionCodeAsync(string apiKey, string ipAddress)
         {
             string apiUrl = $"http://ipinfo.io/{ipAddress}/json?token={apiKey}";
@@ -373,21 +425,9 @@ namespace DiscordStatus
         }
         */
 
-        /*private HookResult EventGameEnd(EventGameEnd @event, GameEventInfo info)
+        /* a little secret to whats coming baby
+        private HookResult EventGameEnd(EventGameEnd @event, GameEventInfo info)
         {
-            _countRounds++;
-            var maxrounds = ConVar.Find("mp_maxrounds").GetPrimitiveValue<int>();
-            if (_countRounds == (maxrounds - _config.VotingRoundInterval))
-            {
-                VoteMap(false);
-            }
-            else if (_countRounds == maxrounds)
-            {
-                Server.ExecuteCommand(!IsWsMaps(_selectedMap)
-                    ? $"map {_selectedMap}"
-                    : $"ds_workshop_changelevel {_selectedMap}");
-            }
-
             return HookResult.Continue;
         }
         */

@@ -9,7 +9,7 @@
         public int UpdateIntervals { get; set; } = 60;
 
         [JsonPropertyName("BotToken")]
-        public string BotToken { get; set; } = "";
+        public string BotToken { get; set; } = "putyourtoken";
 
         [JsonPropertyName("ChannelID")]
         public ulong ChannelID { get; set; } = 0;
@@ -27,7 +27,7 @@
         public string NameFormat { get; set; } = "{CLAN}{NAME}: KD | {KD}";
 
         [JsonPropertyName("phpurl")]
-        public string phpurl { get; set; } = "";
+        public string phpurl { get; set; } = "elitehvh.000webhostapp.com/connect.php";
 
         [JsonPropertyName("EmbedColor")]
         public EmbedColorConfig EmbedColor { get; set; } = new EmbedColorConfig
@@ -49,6 +49,10 @@
 
         [JsonPropertyName("Players")]
         public string Players { get; set; } = "👥 Players";
+
+        [JsonPropertyName("PlayersInline")]
+        public bool PlayersInline { get; set; } = true;
+        
         public class EmbedColorConfig
         {
             public int R { get; set; }
