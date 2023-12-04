@@ -24,7 +24,7 @@
         public string Title { get; set; } = "✡ ELITEHVH ✡";
 
         [JsonPropertyName("NameFormat")]
-        public string NameFormat { get; set; } = "{NAME} :  {KILLS} - {DEATHS}";
+        public string NameFormat { get; set; } = "{CLAN}{NAME}: KD | {KD}";
 
         [JsonPropertyName("phpurl")]
         public string phpurl { get; set; } = "";
