@@ -1,4 +1,4 @@
-# CS2-DiscordMonitor
+# Discord Status
 This CSSharp plugin allows monitoring server status from discord.
 
 ### Description
