@@ -8,7 +8,14 @@ This CSSharp plugin allows monitoring server status from discord.
 [CounterStrikeSharp](https://github.com/roflmuffin/CounterStrikeSharp/) **v90 >=**
 
 ## Features
-- **Displaying servers on discord**
+- **Displaying server status on discord**
+- Sorting Players by CT and T
+- Sorting Players by kills on each side
+- different displays on Empty and WithPlayers
+- Showing Connect ip:port
+- Embeded links directing to automatically lauch steam and joins server
+- Configurable update intervals to release serverloads
+- 
 ## Config
 ```{
   "UpdateIntervals": 30,
@@ -48,9 +55,11 @@ NAME TAG FORMAT:
 - Restart again sorry
 
 ## Server Empty:
-![image](https://github.com/Tian7777/DiscordStatus/assets/41808115/3d964799-eb11-4398-ad6d-928a397081e3)
+![image](https://github.com/Tian7777/DiscordStatus/assets/41808115/6d996299-26a1-4ffd-92de-ef2263c28ce0)
+
 ## Server With Players:
-![image](https://github.com/Tian7777/DiscordStatus/assets/41808115/89bff31a-6d4d-4c84-a2f0-b71c623ac87b)
+![image](https://github.com/Tian7777/DiscordStatus/assets/41808115/ec02086f-2cdb-4137-ad04-6190696e071e)
+
 
 
 
