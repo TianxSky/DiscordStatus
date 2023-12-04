@@ -58,11 +58,11 @@ NAME TAG FORMAT:
 {CC} = CountryCode
 ```
 
-Server Empty:
+##Server Empty:
 ![image](https://github.com/Tian7777/DiscordStatus/assets/41808115/6d996299-26a1-4ffd-92de-ef2263c28ce0)
-Server With Players:
+##Server With Players:
 ![image](https://github.com/Tian7777/DiscordStatus/assets/41808115/ec02086f-2cdb-4137-ad04-6190696e071e)
-PlayerInline false:
+##PlayerInline false:
 ![image](https://github.com/Tian7777/DiscordStatus/assets/41808115/ba1d5075-094f-405c-8c44-326fa7d1f69d)
 
 
