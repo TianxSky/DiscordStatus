@@ -30,9 +30,9 @@ namespace DiscordStatus
     public class DiscordStatus : BasePlugin, IPluginConfig<DSconfig>
     {
         public override string ModuleName => "DiscordStatus";
-        public override string ModuleVersion => "v1.2";
+        public override string ModuleVersion => "v1.3";
         public override string ModuleAuthor => "Tian";
-        public DSconfig Config { get; set; } = new();
+        public override string ModuleDescription => "Server Status on Discord";
         public int _UpdateIntervals;
         public string _BotToken;
         public ulong _ChannelID;
@@ -42,17 +42,19 @@ namespace DiscordStatus
         public string _NameFormat;
         public string _phpurl;
 
+        public DSconfig Config { get; set; } = new();
         public EmbedColorConfig _EmbedColor;
+        private System.Timers.Timer _update;
+        private DiscordSocketClient _client;
+        private IUserMessage _message;
 
         public string _Map;
         public string _Online;
         public string _Score;
         public string _Players; 
         public string IPAddress { get; private set; }
-        private System.Timers.Timer _update;
-        private DiscordSocketClient _client;
-        private IUserMessage _message;
-        private int PlayerCounts = 0;
+        public int PlayerCounts = 0;
+
         List<string> tplayersName = new List<string>();
         List<string> ctplayersName = new List<string>();
 
@@ -101,7 +103,7 @@ namespace DiscordStatus
                     StartListeners();
                 }
                 else {
-                    LoadDiscordStatus(NativeAPI.GetMapName());
+                    LoadDiscordStatusAsync(NativeAPI.GetMapName());
                     LogHelper.LogToConsole(ConsoleColor.Green, $"[Discord Status] -> Map valid, starting bot!");
                 }
                 LogHelper.LogToConsole(ConsoleColor.Green, $"[Discord Status] -> {ModuleName} version {ModuleVersion} loaded");
@@ -112,7 +114,7 @@ namespace DiscordStatus
         {  
             RegisterListener<Listeners.OnMapStart>(mapName =>
             {   
-                LoadDiscordStatus(mapName);
+                LoadDiscordStatusAsync(mapName);
                 LogHelper.LogToConsole(ConsoleColor.Green, $"[Discord Status] -> Map {mapName} started!");
             });
         }
@@ -122,7 +124,7 @@ namespace DiscordStatus
             LogHelper.LogToConsole(ConsoleColor.Green, $"[Discord Status] -> {ModuleName} version {ModuleVersion} unloaded");
         }
 
-        private async Task LoadDiscordStatus(string mapName)
+        private async Task LoadDiscordStatusAsync(string mapName)
         {
             LogHelper.LogToConsole(ConsoleColor.Green, "[Discord Status] -> Trying to connect to Discord");
             var config = new DiscordSocketConfig()
@@ -140,16 +142,10 @@ namespace DiscordStatus
                 {
                     LogHelper.LogToConsole(ConsoleColor.Green, "[Discord Status] -> Client is now Online");
                     /*
-                        var playerEntities = Utilities.GetPlayers();
-                        PlayerCounts = 0;
-                        ctplayersName.Clear();
-                        tplayersName.Clear();
-
-                        foreach (var player in playerEntities)
+                        foreach (var player in players)
                         {
-                            if (!player.IsValid || player == null || !player.PlayerPawn.IsValid || player.IsBot) return HookResult.Handled;
+                            if (!player.IsValid || player == null || !player.PlayerPawn.IsValid || player.IsBot)
                             {
-                                PlayerCounts++;
                                 var playerName = FormatName(player);
                                 if (player.PlayerPawn.Value.TeamNum == 2)
                                     tplayersName.Add(playerName);
@@ -162,10 +158,12 @@ namespace DiscordStatus
                     */
 
                     var channel = await _client.GetChannelAsync(_ChannelID) as IMessageChannel;
+                    var players = Utilities.GetPlayers();
+                    await SortPlayers(players);
 
                     if (_MessageID == 0)
                     {
-                        var message = await channel!.SendMessageAsync(embed: CreateEmbed(IPAddress, PlayerCounts, ctplayersName, tplayersName, mapName));
+                        var message = await channel!.SendMessageAsync(embed: CreateEmbed(IPAddress, tplayersName, ctplayersName, mapName));
                         var message_id = message.Id;
                         _message = message;
                         await channel!.SendMessageAsync($"Please save this message id in the config file: {message_id}");
@@ -173,11 +171,11 @@ namespace DiscordStatus
                     else
                     {
                         _message = await channel.GetMessageAsync(_MessageID) as IUserMessage;
-                        await _message.ModifyAsync(msg => msg.Embed = CreateEmbed(IPAddress, PlayerCounts, ctplayersName, tplayersName, mapName));
+                        await _message.ModifyAsync(msg => msg.Embed = CreateEmbed(IPAddress, tplayersName, ctplayersName, mapName));
                     }
                     LogHelper.LogToConsole(ConsoleColor.Green, "[Discord Status] -> Finished initializing Message");
                     _update = new System.Timers.Timer(TimeSpan.FromSeconds(_UpdateIntervals).TotalMilliseconds);
-                    _update.Elapsed += async (sender, e) => await UpdateEmbed(sender, e).ConfigureAwait(false);
+                    _update.Elapsed += async (sender, e) => UpdateEmbed(sender, e).ConfigureAwait(false);
                     _update.Start();
                 }
                 catch (Exception ex)
@@ -193,9 +191,11 @@ namespace DiscordStatus
             return Task.CompletedTask;
         }
 
-        public Embed CreateEmbed(string IPAddress, int PlayerCounts, List<string> ctplayersName, List<string> tplayersName, string mapName)
+        public Embed CreateEmbed(string IPAddress, List<string> tplayersName, List<string> ctplayersName, string mapName)
         {
-            string connectUrl = String.Concat(_phpurl, $"?ip={IPAddress}:{ConVar.Find("hostport")!.GetPrimitiveValue<int>().ToString()}");               
+            string connectUrl = String.Concat(_phpurl, $"?ip={IPAddress}:{ConVar.Find("hostport")!.GetPrimitiveValue<int>().ToString()}");   
+            var players = Utilities.GetPlayers();
+            var PlayerCounts = players.Count();
             if (PlayerCounts > 0)
             {
                 var builder = new EmbedBuilder()
@@ -247,35 +247,15 @@ namespace DiscordStatus
         private async Task UpdateEmbed(object sender, ElapsedEventArgs e)
         {
             LogHelper.LogToConsole(ConsoleColor.Green, "[Discord Status] -> Updating Embed");
-            var playerEntities = Utilities.GetPlayers();
-            PlayerCounts = 0;
-            tplayersName.Clear();
-            ctplayersName.Clear();
-            
-            var validPlayers = playerEntities
-                .Where(player => player.IsValid && player.PlayerPawn.IsValid && !player.IsBot);
-
-            var sortedPlayers = validPlayers
-                .OrderByDescending(player => player.ActionTrackingServices.MatchStats.Kills);
-
-            foreach (var player in sortedPlayers)
-            {
-                var playerName = await FormatNameAsync(player);
-                PlayerCounts++;
-                if (player.PlayerPawn.Value.TeamNum == 2)
-                    tplayersName.Add(playerName);
-                else if (player.PlayerPawn.Value.TeamNum == 3)
-                    ctplayersName.Add(playerName);
-            }
-
-
+            var players = Utilities.GetPlayers();
             if (_client != null && _message != null)
             {
-                var channel = _client.GetChannel(_ChannelID) as SocketTextChannel;
+                var channel = await _client.GetChannelAsync(_ChannelID) as SocketTextChannel;
                 var mapName = NativeAPI.GetMapName();
                 if (channel != null)
                 {
-                    await _message.ModifyAsync(msg => { msg.Embed = CreateEmbed(IPAddress, PlayerCounts, ctplayersName, tplayersName, mapName); return; });
+                    await SortPlayers(players);
+                    await _message.ModifyAsync(msg => msg.Embed = CreateEmbed(IPAddress, tplayersName, ctplayersName, mapName));
                 }
             }
             LogHelper.LogToConsole(ConsoleColor.Green, "[Discord Status] -> Finished Updating Embed");
@@ -295,10 +275,32 @@ namespace DiscordStatus
 
             return 0;
         }
+        
+        public async Task SortPlayers(List<CCSPlayerController> SortPlayers)
+        {
+            tplayersName.Clear();
+            ctplayersName.Clear();
+            var validPlayers = SortPlayers
+                .Where(player => player.IsValid && player.PlayerPawn.IsValid && !player.IsBot);
+
+
+            var sortedPlayers = validPlayers
+                .OrderByDescending(player => player.ActionTrackingServices.MatchStats.Kills);
+
+
+            foreach (var player in sortedPlayers)
+            {
+                var playerName = await FormatNameAsync(player);
+                if (player.PlayerPawn.Value.TeamNum == 2)
+                    tplayersName.Add(playerName);
+                else if (player.PlayerPawn.Value.TeamNum == 3)
+                    ctplayersName.Add(playerName);
+            }
+        }
+
 
         public async Task<string> FormatNameAsync(CCSPlayerController? Player)
         {
-            if (!Player.IsValid || Player == null || !Player.PlayerPawn.IsValid || Player.IsBot) return "";
             string RC = await GetRegionCodeAsync(Player.IpAddress.Split(':')[0]);
             int kills = Player.ActionTrackingServices.MatchStats.Kills;
             int deaths = Player.ActionTrackingServices.MatchStats.Deaths;
@@ -345,7 +347,6 @@ namespace DiscordStatus
                 }
             }
         }
-        
         /*
         public async Task<string> GetRegionCodeAsync(string apiKey, string ipAddress)
         {
