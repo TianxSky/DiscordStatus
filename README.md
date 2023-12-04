@@ -9,7 +9,7 @@ This CSSharp plugin allows monitoring server status from discord.
 
 ## Features
 - **Displaying server status on discord**
-- Sorting Players by CT and T
+- Sorting Players by CT and T and with their respective team colors
 - Sorting Players by kills on each side
 - different displays on Empty and WithPlayers
 - Showing Connect ip:port
@@ -65,3 +65,5 @@ NAME TAG FORMAT:
 
 ### Roadmap
 - [x] Adding scoreboard snapshots 
+- [x] Adding discord steamid bindings
+- [x] Adding discord VIP roles bound to steamid in database
