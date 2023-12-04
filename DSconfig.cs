@@ -18,7 +18,7 @@
         public ulong MessageID { get; set; } = 0;
 
         [JsonPropertyName("MapImg")]
-        public string MapImg { get; set; } = "https://desireproject.ru/maps/{MAPNAME}.jpg";
+        public string MapImg { get; set; } = "https://elitehvh.000webhostapp.com//maps/{MAPNAME}.jpg";
 
         [JsonPropertyName("Title")]
         public string Title { get; set; } = "✡ ELITEHVH ✡";
@@ -39,16 +39,16 @@
         };
 
         [JsonPropertyName("Map")]
-        public string Map { get; set; } = "🌏 Map";
+        public string Map { get; set; } = "🗺️ Map";
 
         [JsonPropertyName("Online")]
-        public string Online { get; set; } = "📊 Online";
+        public string Online { get; set; } = "🌐 Online";
 
         [JsonPropertyName("Score")]
-        public string Score { get; set; } = "🔃 Scoreboard";
+        public string Score { get; set; } = "🏆 Scoreboard";
 
         [JsonPropertyName("Players")]
-        public string Players { get; set; } = "🐬 Players";
+        public string Players { get; set; } = "👥 Players";
         public class EmbedColorConfig
         {
             public int R { get; set; }
