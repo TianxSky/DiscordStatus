@@ -3,3 +3,5 @@ bin
 obj
 *.dll
 compile.cmd
+.vs
+.cr

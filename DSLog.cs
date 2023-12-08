@@ -4,30 +4,34 @@ using CounterStrikeSharp.API.Modules.Utils;
 
 namespace DiscordStatus;
 
-public static class LogHelper
+public static class DSLog
 {
-    public static void LogToConsole(string messageToLog)
+    internal static void Log(int purpose, string message)
     {
-        Console.WriteLine(messageToLog);
+        switch (purpose)
+        {
+            case 0: LogToConsole(ConsoleColor.Magenta, "[Discord Status] ->" + message); break;
+            case 1: LogToConsole(ConsoleColor.Green, "[Discord Status] ->" + message); break;
+            case 2: LogToConsole(ConsoleColor.Red, "[Discord Status] ->" + message); break;
+        }
     }
-    
     public static void LogToConsole(ConsoleColor color, string messageToLog)
     {
         Console.ForegroundColor = color;
         Console.WriteLine(messageToLog);
         Console.ResetColor();
     }
-    
+
     public static void LogToChat(CCSPlayerController? player, string messageToLog)
     {
         player?.PrintToChat(messageToLog);
     }
-    
+
     public static void LogToChatAll(string messageToLog)
     {
         Server.PrintToChatAll(messageToLog);
     }
-    
+
     public static string ReplaceTags(this string text)
     {
         text = text.Replace("{DEFAULT}", $"{ChatColors.Default}");
@@ -50,7 +54,7 @@ public static class LogHelper
         text = text.Replace("{MAGENTA}", $"{ChatColors.Magenta}");
         text = text.Replace("{LIGHTRED}", $"{ChatColors.LightRed}");
 
-	    return text;
+        return text;
     }
 
 }

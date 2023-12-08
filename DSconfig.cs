@@ -1,65 +1,69 @@
-    namespace DiscordStatus
+namespace DiscordStatus
 {
     using System.Text.Json.Serialization;
     using CounterStrikeSharp.API.Core;
 
     public class DSconfig : BasePluginConfig
     {
-        [JsonPropertyName("UpdateIntervals")]
-        public int UpdateIntervals { get; set; } = 60;
 
-        [JsonPropertyName("BotToken")]
-        public string BotToken { get; set; } = "putyourtoken";
+        [JsonPropertyName("Title")]
+        public string Title { get; set; } = "";
 
-        [JsonPropertyName("ChannelID")]
-        public ulong ChannelID { get; set; } = 0;
+        [JsonPropertyName("UpdateInterval")]
+        public int UpdateInterval { get; set; } = 30;
+
+        [JsonPropertyName("NotifyMembersRoleID")]
+        public ulong NotifyMembersRoleID { get; set; } = 0;
+
+        [JsonPropertyName("WebhookURL")]
+        public string WebhookURL { get; set; } = "puturwebhookurlhere";
 
         [JsonPropertyName("MessageID")]
         public ulong MessageID { get; set; } = 0;
 
+        [JsonPropertyName("PHPURL")]
+        public string PHPURL { get; set; } = "";
+
         [JsonPropertyName("MapImg")]
-        public string MapImg { get; set; } = "https://elitehvh.000webhostapp.com//maps/{MAPNAME}.jpg";
+        public string MapImg { get; set; } = "{MAPNAME}.jpg";
 
-        [JsonPropertyName("Title")]
-        public string Title { get; set; } = "✡ ELITEHVH ✡";
+        [JsonPropertyName("OfflineImg")]
+        public string OfflineImg { get; set; } = "not required";
 
-        [JsonPropertyName("NameFormat")]
-        public string NameFormat { get; set; } = "{CLAN}{NAME}: KD | {KD}";
+        [JsonPropertyName("IdleImg")]
+        public string IdleImg { get; set; } = "not required";
 
-        [JsonPropertyName("phpurl")]
-        public string phpurl { get; set; } = "elitehvh.000webhostapp.com/connect.php";
+        [JsonPropertyName("RequestImg")]
+        public string RequestImg { get; set; } = "not required";
 
         [JsonPropertyName("EmbedColor")]
-        public EmbedColorConfig EmbedColor { get; set; } = new EmbedColorConfig
-        {
-            R = 34,
-            G = 139,
-            B = 34,
-            Random = false
-        };
+        public string EmbedColor { get; set; } = "#00ffff";
 
-        [JsonPropertyName("Map")]
-        public string Map { get; set; } = "🗺️ Map";
+        [JsonPropertyName("RandomColor")]
+        public bool RandomColor { get; set; } = true;
 
-        [JsonPropertyName("Online")]
-        public string Online { get; set; } = "🌐 Online";
+        [JsonPropertyName("MapField")]
+        public string MapField { get; set; } = "🗺️ Map";
 
-        [JsonPropertyName("Score")]
-        public string Score { get; set; } = "🏆 Scoreboard";
+        [JsonPropertyName("OnlineField")]
+        public string OnlineField { get; set; } = "👥 Online";
 
-        [JsonPropertyName("Players")]
-        public string Players { get; set; } = "👥 Players";
+        [JsonPropertyName("CTField")]
+        public string CTField { get; set; } = "CT : {SCORE}";
+
+        [JsonPropertyName("TField")]
+        public string TField { get; set; } = "T : {SCORE}";
+
+        [JsonPropertyName("NameFormat")]
+        public string NameFormat { get; set; } = "{CCFlag} {NAME}: KD | {KD}";
+
+        [JsonPropertyName("PlayersFlagMode")]
+        public bool PlayersFlagMode { get; set; } = true;
 
         [JsonPropertyName("PlayersInline")]
         public bool PlayersInline { get; set; } = true;
-        
-        public class EmbedColorConfig
-        {
-            public int R { get; set; }
-            public int G { get; set; }
-            public int B { get; set; }
-            public bool Random { get; set; }
-        }
 
+        [JsonPropertyName("Version")]
+        public override int Version { get; set; } = 3;
     }
 }

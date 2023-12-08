@@ -2,49 +2,52 @@
 This CSSharp plugin allows monitoring server status from discord with cute embeds and nameformat support.
 
 ## Requirments
-[CounterStrikeSharp](https://github.com/roflmuffin/CounterStrikeSharp/) **>= 92**
+[CounterStrikeSharp](https://github.com/roflmuffin/CounterStrikeSharp/) **>= 101**
 
 ## Usage
 - Install plugin like u use to
 - Make a webhost server and put connect.php there if you have one(you can use free webhosting like 000webhost or u can use it mine)* not required
-- Do the samething for mag img url (or use mine)
-- When config is created at counterstrikesharp/configs ,edit the config with ur bot tokens etc
-- RESTART SERVER
-- After first init of bot messages, copy the message id to the config
-- Restart again sorry
+- Do the samething for map img url (or use mine or see below)
+- Load the plugin
+- Change the config
+- RESTART SERVER (required if had old version loaded)
+- You can try hotloading after changing config but it is not recommended
 
 ## Features
 - **Displaying server status on discord**
-- Sorting Players by CT and T and with their respective team colors
-- Sorting Players by kills on each side
-- different displays on Empty and WithPlayers
+- Showing Country Flags
+- Custom Name Formatting
+- Sorting Players by CT and T and with their respective team colors (not working if using flags)
+- Sorting Players by kills
+- different displays on Idle, with players, with players not inlined, requesting players, offline.
 - Showing Connect ip:port
 - Embeded links directing to automatically lauch steam and joins server
 - Configurable update intervals to release serverloads
+- Automatically update config and rename the old config
 
 ## Config
 ```json
 {
-  "UpdateIntervals": 60,
-  "BotToken": "puturtokoen",
-  "ChannelID": 0,
+  "Title": "",
+  "UpdateInterval": 30,
+  "NotifyMembersRoleID": 0,
+  "WebhookURL": "",
   "MessageID": 0,
-  "MapImg": "https://elitehvh.000webhostapp.com//maps/{MAPNAME}.jpg",
-  "Title": "✡ ELITEHVH ✡",
-  "NameFormat": "{CLAN}{NAME}: KD | {KD}",
-  "phpurl": "https://elitehvh.000webhostapp.com/connect.php",
-  "EmbedColor": {
-    "R": 34,
-    "G": 139,
-    "B": 34,
-    "Random": true
-  },
-  "Map": "🗺️ Map",
-  "Online": "🌐 Online",
-  "Score": "🏆 Scoreboard",
-  "Players": "👥 Players",
-  "PlayersInline": true,
-  "Version": 1
+  "PHPURL": "https://something.com/connect.php",
+  "MapImg": "https://something.com//maps/{MAPNAME}.jpg",
+  "OfflineImg": "", //any of these img url can be gif, jpg, png, etc.
+  "IdleImg": "",
+  "RequestImg":  "",
+  "EmbedColor": "#00ffff", //this dont matter if RandomColor = true
+  "RandomColor": true, 
+  "MapField": "🗺️ Map",
+  "OnlineField": "👥 Online",
+  "CTField": "CT : {SCORE}", // you can have {SCORE} or dont
+  "TField": "T : {SCORE}",
+  "NameFormat": "{FLAG} {NAME}: KD | {KD}", //see below
+  "PlayersFlagMode": true, //if want to show flags
+  "PlayersInline": false, //if want to show players vertically (false)
+  "Version": 3
 }
 ```
 ```
@@ -54,22 +57,20 @@ NAME TAG FORMAT:
 {D} = DEATHS
 {A} = ASSISTS
 {KD} = KD Ratio
-{Clan} = Clantag
-{RC} = RegionCode
-{CC} = CountryCode
+{CLAN} = Clantag
+{RC} = Region Code
+{CC} = Country Code
+{FLAG} = Country Flag
 ```
+## Note
+For imageurl u can also use "https://image.gametracker.com/images/maps/160x120/csgo/{MAPNAME}.jpg"
 
-## Server Empty:ㅤㅤㅤㅤServer With Players:
-![image](https://github.com/Tian7777/DiscordStatus/assets/41808115/6d996299-26a1-4ffd-92de-ef2263c28ce0)
-![image](https://github.com/Tian7777/DiscordStatus/assets/41808115/ec02086f-2cdb-4137-ad04-6190696e071e)
+## Server Empty(Custom Img):
+![image](https://github.com/Tian7777/DiscordStatus/assets/41808115/ec6b771e-8518-4bcc-8965-6c575e584f76)
+## Server With Players(Custom Map Img / Custom Img):
+![image](https://github.com/Tian7777/DiscordStatus/assets/41808115/236c572d-84a3-4faf-b37e-985b58388e16)
 ## PlayerInline false:
 ![image](https://github.com/Tian7777/DiscordStatus/assets/41808115/ba1d5075-094f-405c-8c44-326fa7d1f69d)
 
-
-For imageurl u can also use "https://image.gametracker.com/images/maps/160x120/csgo/{MAPNAME}.jpg"
-
-
 ### Roadmap
 - [x] Adding scoreboard snapshots 
-- [x] Adding discord steamid bindings
-- [x] Adding discord VIP roles bound to steamid in database
