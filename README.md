@@ -12,7 +12,8 @@ This CSSharp plugin allows monitoring server status from discord with cute embed
 - Change the config
 - RESTART SERVER (required if had old version loaded)
 - You can try hotloading after changing config but it is not recommended
-
+## Commands
+- request - @notify members to join the server
 ## Features
 - **Displaying server status on discord**
 - Showing Country Flags
