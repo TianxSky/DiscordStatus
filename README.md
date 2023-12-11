@@ -29,26 +29,37 @@ This CSSharp plugin allows monitoring server status from discord with cute embed
 ## Config
 ```json
 {
-  "Title": "",
-  "UpdateInterval": 30,
-  "NotifyMembersRoleID": 0,
-  "WebhookURL": "",
-  "MessageID": 0,
-  "PHPURL": "https://something.com/connect.php",
-  "MapImg": "https://something.com//maps/{MAPNAME}.jpg",
-  "OfflineImg": "", //any of these img url can be gif, jpg, png, etc.
-  "IdleImg": "",
-  "RequestImg":  "",
-  "EmbedColor": "#00ffff", //this dont matter if RandomColor = true
-  "RandomColor": true, 
-  "MapField": "🗺️ Map",
-  "OnlineField": "👥 Online",
-  "CTField": "CT : {SCORE}", // you can have {SCORE} or dont
-  "TField": "T : {SCORE}",
-  "NameFormat": "{FLAG} {NAME}: KD | {KD}", //see below
-  "PlayersFlagMode": true, //if want to show flags
-  "PlayersInline": false, //if want to show players vertically (false)
-  "Version": 3
+  "GeneralConfig": {
+    "ServerIP": "asd.asd", // actual ip address or custom domain: playcs2.com
+    "UpdateInterval": 45,
+    "PHPURL": "https://playcs2.com/connect.php"
+  },
+  "WebhookConfig": {
+    "NotifyMembersRoleID": 0,
+    "NewMapNotification": false,
+    "GameEndScoreboard": true,
+    "NotifyWebhookURL": "",
+    "ScoreboardURL": "",
+    "StatusWebhookURL": "",
+    "StatusMessageID": 0
+  },
+  "EmbedConfig": {
+    "Title": "",
+    "MapImg": "{MAPNAME}.gif.jpg.png",
+    "OfflineImg": "",
+    "IdleImg": "{MAPNAME}.jpg/asdadsads.gif",
+    "RequestImg": "",
+    "EmbedColor": "#00ffff",
+    "RandomColor": true,
+    "MapField": "🗺️ㅤMap",
+    "OnlineField": "👥ㅤOnline",
+    "CTField": "CT :ㅤ{SCORE}",
+    "TField": "T :ㅤ{SCORE}",
+    "MVPField": " 👑ㅤMVP ",
+    "NameFormat": "{FLAG}{CLAN} {NAME}: {K} - {D}",
+    "PlayersInline": true
+  },
+  "Version": 4
 }
 ```
 ```
