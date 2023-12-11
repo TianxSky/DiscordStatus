@@ -13,17 +13,27 @@ namespace DiscordStatus
 
             RegisterEventHandler<EventPlayerConnectFull>(OnPlayerConnectFull);
             RegisterEventHandler<EventPlayerDisconnect>(OnPlayerDisconnect);
-            RegisterEventHandler<EventRoundEnd>(OnRoundEnd);
-            //RegisterEventHandler<EventPlayerDeath>(OnPlayerDeath);
             RegisterEventHandler<EventPlayerTeam>(OnPlayerTeam);
+            RegisterEventHandler<EventRoundEnd>(OnRoundEnd);
+            RegisterEventHandler<EventCsWinPanelMatch>(OnGameEnd);
+            //RegisterEventHandler<EventPlayerDeath>(OnPlayerDeath);
+            RegisterEventHandler<EventGameNewmap>(OnGameNewmap);
         }
 
+        private void OnMapStart(string mapName)
+        {
+            DSLog.Log(1, $"Map {mapName} started!");
+            _g.MapName = mapName;
+            _g.HostPort = ConVar.Find("hostport")!.GetPrimitiveValue<int>().ToString();
+            _g.MaxPlayers = Server.MaxPlayers;
+            Task.Run(async () => await LoadDiscordStatusAsync());
+        }
         private HookResult OnPlayerConnectFull(EventPlayerConnectFull @event, GameEventInfo info)
-        {      
-            CCSPlayerController ? player = @event.Userid;
-            if (!IsPlayerValid(player)) return HookResult.Continue;
-            AddTimer(2.0f, () =>
-            {
+        {
+            CCSPlayerController? player = @event.Userid;
+            if (!_chores.IsPlayerValid(player)) return HookResult.Continue;
+            /*AddTimer(2.0f, () =>
+            {*/
                 PlayerInfo playerInfo = new()
                 {
                     UserId = player?.UserId,
@@ -33,20 +43,18 @@ namespace DiscordStatus
                     IpAddress = player?.IpAddress?.Split(":")[0],
                     Clan = player?.Clan
                 };
-                if (HasRC)
+                if (_g.HasRC)
                 {
-                    Task.Run(async () => playerInfo.Region = await IPQueryAsync(playerInfo.IpAddress, "region_code") ?? string.Empty);
+                    Task.Run(async () => playerInfo.Region = await _query.IPQueryAsync(playerInfo.IpAddress, "region_code").ConfigureAwait(false) ?? string.Empty);
                 }
 
-                if (HasCC)
+                if (_g.HasCC)
                 {
-                    var geoService = new GeoLocationService(new HttpClient());
-                    Task.Run(async () => playerInfo.Country = await geoService.GetCountryCodeFromIpAsync(playerInfo.IpAddress));
-                    //Task.Run(async () => playerInfo.Country = await IPQueryAsync(playerInfo.IpAddress, "country_code") ?? string.Empty);
+                    Task.Run(async () => playerInfo.Country = await _query.GetCountryCodeAsync(playerInfo.IpAddress).ConfigureAwait(false) ?? string.Empty);
                 }
 
-                PlayerList.Add(playerInfo);
-            });
+                _g.PlayerList.Add(playerInfo);
+           /* });*/
             return HookResult.Continue;
         }
 
@@ -54,11 +62,11 @@ namespace DiscordStatus
         {
             CCSPlayerController _player = @event.Userid;
 
-            if (!IsPlayerValid(_player)) return HookResult.Continue;
-            var theplayer = PlayerList.Find(player => player.UserId == _player.UserId);
+            if (!_chores.IsPlayerValid(_player)) return HookResult.Continue;
+            var theplayer = _g.PlayerList.Find(player => player.UserId == _player.UserId);
             if (theplayer != null)
             {
-                PlayerList.Remove(theplayer);
+                _g.PlayerList.Remove(theplayer);
                 DSLog.Log(0, $"Removed {theplayer.Name}'s cache");
             }
             else
@@ -73,9 +81,9 @@ namespace DiscordStatus
             var _player = @event.Userid;
             var teamid = @event.Team;
             if (teamid == 0) return HookResult.Continue;
-            if (!IsPlayerValid(_player)) return HookResult.Continue;
-            var playerList = PlayerList;
-            AddTimer(5.0f, () =>
+            if (!_chores.IsPlayerValid(_player)) return HookResult.Continue;
+            var playerList = _g.PlayerList;
+            AddTimer(2.0f, () =>
             {
                 PlayerInfo existingPlayer = playerList.Find(player => player.UserId == _player.UserId);
                 if (existingPlayer != null)
@@ -94,22 +102,53 @@ namespace DiscordStatus
         {
             foreach (var player in Utilities.GetPlayers())
             {
-                if (!IsPlayerValid(player)) continue;
-                UpdatePlayer(player);
+                if (!_chores.IsPlayerValid(player)) continue;
+                _chores.UpdatePlayer(player);
             }
             var _teams = Utilities.FindAllEntitiesByDesignerName<CCSTeam>("cs_team_manager");
-            GetScore(_teams);
+            _chores.GetScore(_teams);
 
             return HookResult.Continue;
         }
-
-        private void OnMapStart(string mapName)
+        private HookResult OnGameNewmap(EventGameNewmap @event, GameEventInfo info)
         {
-            DSLog.Log(1, $"Map {mapName} started!");
-            MapName = mapName;
-            HostPort = ConVar.Find("hostport")!.GetPrimitiveValue<int>().ToString();
-            MaxPlayers = Server.MaxPlayers;
-            LoadDiscordStatusAsync().Wait();
+            if (!_g.WConfig.NewMapNotification) return HookResult.Continue;
+            _g.MapName = @event.Mapname;
+            Task.Run(() => _webhook.NewMap(@event.Mapname));
+            return HookResult.Continue;
+        }
+        private HookResult OnGameEnd(EventCsWinPanelMatch @event, GameEventInfo info)
+        {
+            if (!_g.WConfig.GameEndScoreboard) return HookResult.Continue;
+            var _players = Utilities.GetPlayers();
+            foreach (var _player in _players)
+            {
+                _chores.UpdatePlayer(_player);
+            };
+            var players = _g.PlayerList;
+
+            if (players.Count > 0)
+            {
+                _chores.SortPlayers();
+
+                var tPlayerList = players.Where(player => player.TeamID == 2).Select(player => _chores.FormatStats(player));
+                var crPlayerList = players.Where(player => player.TeamID == 3).Select(player => _chores.FormatStats(player));
+
+                _g.TPlayersName.AddRange(tPlayerList);
+                _g.CtPlayersName.AddRange(crPlayerList);
+            }
+            var mvp = _g.PlayerList.OrderByDescending(player => player.Kills).First();
+            if (mvp == null)
+            {
+                DSLog.Log(2, "Mvp not found");
+                return HookResult.Continue;
+            }
+            var mvpname = mvp.Name;
+            var steamid = mvp.SteamId;
+            var steamlink = $"https://steamcommunity.com/profiles/{steamid}";
+            DSLog.Log(1, $"Game ended! MVP: {mvpname}");
+            Task.Run(() => _webhook.GameEnd(mvp, steamlink));
+            return HookResult.Continue;
         }
     }
 }

@@ -1,6 +1,9 @@
-
 bin
 obj
 .vs
 .cr
 *.ini
+*.zip
+release
+release/addons/counterstrikesharp/plugins/DiscordStatus
+Source/.editorconfig

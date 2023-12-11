@@ -4,35 +4,37 @@ using CounterStrikeSharp.API.Modules.Utils;
 
 namespace DiscordStatus;
 
-public static class DSLog
+internal static class DSLog
 {
     internal static void Log(int purpose, string message)
     {
         switch (purpose)
         {
-            case 0: LogToConsole(ConsoleColor.Magenta, "[Discord Status] ->" + message); break;
-            case 1: LogToConsole(ConsoleColor.Green, "[Discord Status] ->" + message); break;
-            case 2: LogToConsole(ConsoleColor.Red, "[Discord Status] ->" + message); break;
+            case 0: LogToConsole(ConsoleColor.Magenta, "[Discord Status] -> " + message); break;
+            case 1: LogToConsole(ConsoleColor.Green, "[Discord Status] -> " + message); break;
+            case 2: LogToConsole(ConsoleColor.Red, "[Discord Status] -> " + message); break;
         }
     }
-    public static void LogToConsole(ConsoleColor color, string messageToLog)
+    internal static void LogToConsole(ConsoleColor color, string messageToLog)
     {
         Console.ForegroundColor = color;
         Console.WriteLine(messageToLog);
         Console.ResetColor();
     }
 
-    public static void LogToChat(CCSPlayerController? player, string messageToLog)
+    internal static void LogToChat(CCSPlayerController? player, string messageToLog)
     {
-        player?.PrintToChat(messageToLog);
+        messageToLog = ReplaceTags($"{ChatColors.Red}[Discord Status]: " + messageToLog);
+        Server.NextFrame(() => player?.PrintToChat(messageToLog));
     }
 
-    public static void LogToChatAll(string messageToLog)
+    internal static void LogToChatAll(string messageToLog)
     {
-        Server.PrintToChatAll(messageToLog);
+        messageToLog = ReplaceTags($"{ChatColors.Red}[Discord Status]: " + messageToLog);
+        Server.NextFrame(() => Server.PrintToChatAll(messageToLog));
     }
 
-    public static string ReplaceTags(this string text)
+    internal static string ReplaceTags(this string text)
     {
         text = text.Replace("{DEFAULT}", $"{ChatColors.Default}");
         text = text.Replace("{WHITE}", $"{ChatColors.White}");
@@ -53,7 +55,6 @@ public static class DSLog
         text = text.Replace("{BLUEGREY}", $"{ChatColors.BlueGrey}");
         text = text.Replace("{MAGENTA}", $"{ChatColors.Magenta}");
         text = text.Replace("{LIGHTRED}", $"{ChatColors.LightRed}");
-
         return text;
     }
 
