@@ -79,12 +79,12 @@ For imageurl u can also use "https://image.gametracker.com/images/maps/160x120/c
 
 ## Server Empty(Custom Img):
 ![image](https://github.com/Tian7777/DiscordStatus/assets/41808115/1b64768f-7ebe-4020-957c-8f9b514f988b)
-
 ## Server With Players(Custom Map Img / Custom Img):
 ![image](https://github.com/Tian7777/DiscordStatus/assets/41808115/0bba2635-886c-47ac-a7b6-c49b7fc0f53e)
-
-## PlayerInline false:
-![image](https://github.com/Tian7777/DiscordStatus/assets/41808115/ba1d5075-094f-405c-8c44-326fa7d1f69d)
+## Scoreboard Snapshot
+![image](https://github.com/Tian7777/DiscordStatus/assets/41808115/4d760cff-0483-4694-a1f2-97fb139b02f0)
+## Request Players:
+![image](https://github.com/Tian7777/DiscordStatus/assets/41808115/e50e0298-0581-485f-a1d6-46c6d9421bbd)
 
 ### Roadmap
 - [x] Adding scoreboard snapshots 
