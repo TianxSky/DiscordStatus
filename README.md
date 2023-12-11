@@ -6,14 +6,14 @@ This CSSharp plugin allows monitoring server status from discord with cute embed
 
 ## Usage
 - Install plugin like u use to
-- Make a webhost server and put connect.php there if you have one(you can use free webhosting like 000webhost or u can use it mine)* not required
-- Do the samething for map img url (or use mine or see below)
+- Make a webhost server and put connect.php there if you have one(you can use free webhosting like 000webhost)* not required
+- Do the samething for map img url (or see below)
 - Load the plugin
 - Change the config
-- RESTART SERVER (required if had old version loaded)
-- You can try hotloading after changing config but it is not recommended
 ## Commands
-- request - @notify members to join the server
+- css_request - @notify members to join the server
+- css_update_names - Update nameformat and updating the embed with the provided argument after the command. exmaple usage: css_update_names {FLAG}{CLAN} {NAME}: {K} - {D}
+- css_update_settings - read and update settings from config without reloading the plugin
 ## Features
 - **Displaying server status on discord**
 - Showing Country Flags
