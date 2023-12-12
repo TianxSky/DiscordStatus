@@ -39,7 +39,7 @@ namespace DiscordStatus
                     DSLog.Log(2, "MessageID is not set up yet, Creating a new one now!");
                     var message = await webhookClient.SendMessageAsync(embeds: new[] { CreateStatusEmbed() });
                     _g.MessageID = message;
-                    await ConfigManager.SaveAsync("WebhookConfig", "MessageID", _g.MessageID);
+                    await ConfigManager.SaveAsync("WebhookConfig", "StatusMessageID", _g.MessageID);
                 }
                 else
                 {
