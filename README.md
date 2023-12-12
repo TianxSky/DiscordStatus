@@ -9,7 +9,7 @@ This CSSharp plugin allows monitoring server status from discord with cute embed
 - Make a webhost server and put connect.php there if you have one(you can use free webhosting like 000webhost)* not required
 - Do the samething for map img url (or see below)
 - Load the plugin
-- Change the config
+- Change the config (/addons/counterstrikesharp/configs/plugins/DiscordStatus)
 ## Commands
 - css_request - @notify members to join the server
 - css_update_names - Update nameformat and updating the embed with the provided argument after the command. exmaple usage: css_update_names {FLAG}{CLAN} {NAME}: {K} - {D}
