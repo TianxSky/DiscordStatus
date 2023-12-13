@@ -39,6 +39,7 @@ This CSSharp plugin allows monitoring server status from discord with cute embed
     "NewMapNotification": false,
     "GameEndScoreboard": true,
     "NotifyWebhookURL": "",
+    "RequestPlayersURL": "",
     "ScoreboardURL": "",
     "StatusWebhookURL": "",
     "StatusMessageID": 0
