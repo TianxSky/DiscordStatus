@@ -22,4 +22,3 @@
         public List<PlayerInfo> PlayerList { get; set; } = new List<PlayerInfo>();
     }
 }
-

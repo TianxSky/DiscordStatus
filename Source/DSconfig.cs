@@ -17,9 +17,9 @@ namespace DiscordStatus
         [JsonPropertyName("Version")]
         public override int Version { get; set; } = 5;
     }
+
     public sealed class GeneralConfig
     {
-
         [JsonPropertyName("ServerIP")]
         public string ServerIP { get; set; } = string.Empty;
 
@@ -29,6 +29,7 @@ namespace DiscordStatus
         [JsonPropertyName("PHPURL")]
         public string PHPURL { get; set; } = string.Empty;
     }
+
     public sealed class EmbedConfig
     {
         [JsonPropertyName("Title")]
@@ -73,6 +74,7 @@ namespace DiscordStatus
         [JsonPropertyName("PlayersInline")]
         public bool PlayersInline { get; set; } = true;
     }
+
     public sealed class WebhookConfig
     {
         [JsonPropertyName("NotifyMembersRoleID")]

@@ -9,6 +9,7 @@ namespace DiscordStatus
     {
         private DateTime _globalCooldown = DateTime.MinValue;
         private readonly TimeSpan _globalCooldownDuration = TimeSpan.FromSeconds(60);
+
         [ConsoleCommand("css_request", "Request players from discord")]
         public async void RequestPlayers(CCSPlayerController? player, CommandInfo command)
         {

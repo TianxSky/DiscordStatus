@@ -5,16 +5,18 @@ namespace DiscordStatus
 {
     public class Webhook : IWebhook
     {
-        readonly IChores _chores;
-        readonly Globals _g;
-        WebhookConfig WConfig => _g.WConfig;
-        EmbedConfig EConfig => _g.EConfig;
-        GeneralConfig GConfig => _g.GConfig;
+        private readonly IChores _chores;
+        private readonly Globals _g;
+        private WebhookConfig WConfig => _g.WConfig;
+        private EmbedConfig EConfig => _g.EConfig;
+        private GeneralConfig GConfig => _g.GConfig;
+
         public Webhook(IChores chores, Globals globals)
         {
             _g = globals;
             _chores = chores;
         }
+
         private DiscordWebhookClient CreateWebhookClient(string url)
         {
             if (!_chores.IsURLValid(url))
@@ -24,7 +26,6 @@ namespace DiscordStatus
             }
             return new DiscordWebhookClient(url);
         }
-
 
         public async Task InitialMessageAsync()
         {
@@ -55,7 +56,6 @@ namespace DiscordStatus
                 DSLog.Log(2, "Failed Initializing: " + ex.ToString());
             }
         }
-
 
         public Embed CreateStatusEmbed()
         {
@@ -130,6 +130,7 @@ namespace DiscordStatus
                 DSLog.Log(2, "Invalid webhook URL!");
             }
         }
+
         public async Task RequestPlayers(string name)
         {
             using var webhookClient = CreateWebhookClient(WConfig.RequestPlayersURL);
@@ -145,6 +146,7 @@ namespace DiscordStatus
             builder.Build();
             await webhookClient.SendMessageAsync(embeds: new[] { builder.Build() });
         }
+
         public async Task NewMap(string mapname)
         {
             using var webhookClient = CreateWebhookClient(WConfig.NotifyWebhookURL);

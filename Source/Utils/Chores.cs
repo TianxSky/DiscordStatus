@@ -9,22 +9,28 @@ namespace DiscordStatus
     public class Chores : IChores
     {
         private readonly Globals _g;
-        EmbedConfig EConfig => _g.EConfig;
 
         public Chores(Globals globals)
         {
             _g = globals;
+        }
 
-        }
-        public bool IsPlayerValid(CCSPlayerController? player)
+        private EmbedConfig EConfig => _g.EConfig;
+
+        public string FormatStats(PlayerInfo playerinfo)
         {
-            return (player != null && player.IsValid && !player.IsBot && !player.IsHLTV);
-        }
-        public bool IsURLValid(string? url)
-        {
-            string? urlPattern = @"^(https?:\/\/[^\s\/$.?#].[^\s]*)$";
-            Regex regex = new(urlPattern, RegexOptions.IgnoreCase);
-            return regex.IsMatch(url);
+            var nameBuilder = new StringBuilder(_g.NameFormat);
+            nameBuilder.Replace("{NAME}", playerinfo.Name);
+            nameBuilder.Replace("{K}", playerinfo.Kills.ToString());
+            nameBuilder.Replace("{D}", playerinfo.Deaths.ToString());
+            nameBuilder.Replace("{A}", playerinfo.Assists.ToString());
+            nameBuilder.Replace("{KD}", playerinfo.KD);
+            nameBuilder.Replace("{CLAN}", playerinfo.Clan);
+            nameBuilder.Replace("{CC}", playerinfo.Country);
+            nameBuilder.Replace("{FLAG}", $":flag_{playerinfo.Country.ToLower()}:");
+            nameBuilder.Replace("{RC}", playerinfo.Region);
+            var formattedName = nameBuilder.ToString();
+            return formattedName;
         }
 
         public Color GetEmbedColor()
@@ -60,27 +66,24 @@ namespace DiscordStatus
             }
         }
 
+        public bool IsPlayerValid(CCSPlayerController? player)
+        {
+            return (player != null && player.IsValid && !player.IsBot && !player.IsHLTV);
+        }
+
+        public bool IsURLValid(string? url)
+        {
+            string? urlPattern = @"^(https?:\/\/[^\s\/$.?#].[^\s]*)$";
+            Regex regex = new(urlPattern, RegexOptions.IgnoreCase);
+            return regex.IsMatch(url);
+        }
+
         public void SortPlayers()
         {
             _g.TPlayersName.Clear();
             _g.CtPlayersName.Clear();
             var sorted = _g.PlayerList?.OrderByDescending(i => i.Kills);
             _g.PlayerList = sorted.ToList();
-        }
-        public string FormatStats(PlayerInfo playerinfo)
-        {
-            var nameBuilder = new StringBuilder(_g.NameFormat);
-            nameBuilder.Replace("{NAME}", playerinfo.Name);
-            nameBuilder.Replace("{K}", playerinfo.Kills.ToString());
-            nameBuilder.Replace("{D}", playerinfo.Deaths.ToString());
-            nameBuilder.Replace("{A}", playerinfo.Assists.ToString());
-            nameBuilder.Replace("{KD}", playerinfo.KD);
-            nameBuilder.Replace("{CLAN}", playerinfo.Clan);
-            nameBuilder.Replace("{CC}", playerinfo.Country);
-            nameBuilder.Replace("{FLAG}", $":flag_{playerinfo.Country.ToLower()}:");
-            nameBuilder.Replace("{RC}", playerinfo.Region);
-            var formattedName = nameBuilder.ToString();
-            return formattedName;
         }
 
         public void UpdatePlayer(CCSPlayerController updatedPlayer)

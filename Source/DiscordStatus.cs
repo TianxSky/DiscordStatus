@@ -1,7 +1,6 @@
 using CounterStrikeSharp.API;
 using CounterStrikeSharp.API.Core;
 
-
 namespace DiscordStatus
 {
     public partial class DiscordStatus : BasePlugin, IPluginConfig<DSconfig>
@@ -14,6 +13,7 @@ namespace DiscordStatus
         private readonly Globals _g;
         private bool init = false;
         public DSconfig Config { get; set; }
+
         public DiscordStatus(IWebhook webhook, IQuery query, IChores chores, Globals g)
         {
             _webhook = webhook;
@@ -21,6 +21,7 @@ namespace DiscordStatus
             _chores = chores;
             _g = g;
         }
+
         public override async void Load(bool hotReload)
         {
             Server.NextFrame(() =>
@@ -79,7 +80,6 @@ namespace DiscordStatus
                 DSLog.Log(1, "Finished loading config file");
             }
         }
-
 
         private async Task LoadDiscordStatusAsync()
         {

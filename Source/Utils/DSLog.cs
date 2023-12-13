@@ -15,6 +15,7 @@ internal static class DSLog
             case 2: LogToConsole(ConsoleColor.Red, "[Discord Status] -> " + message); break;
         }
     }
+
     internal static void LogToConsole(ConsoleColor color, string messageToLog)
     {
         Console.ForegroundColor = color;
@@ -57,5 +58,4 @@ internal static class DSLog
         text = text.Replace("{LIGHTRED}", $"{ChatColors.LightRed}");
         return text;
     }
-
 }

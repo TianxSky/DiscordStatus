@@ -6,6 +6,7 @@ namespace DiscordStatus
     public partial class DiscordStatus
     {
         public int deaths = 0;
+
         private void RegisterListeners()
         {
             RegisterListener<Listeners.OnMapStart>(OnMapStart);
@@ -34,6 +35,7 @@ namespace DiscordStatus
                 OnNewMap(mapName);
             }
         }
+
         private HookResult OnPlayerConnectFull(EventPlayerConnectFull @event, GameEventInfo info)
         {
             CCSPlayerController? player = @event.Userid;
@@ -116,6 +118,7 @@ namespace DiscordStatus
 
             return HookResult.Continue;
         }
+
         private void OnNewMap(string mapname)
         {
             DSLog.Log(1, $"Map {_g.MapName} changed to {mapname}! {_g.WConfig.NewMapNotification}");
@@ -123,6 +126,7 @@ namespace DiscordStatus
             _g.MapName = mapname;
             Task.Run(() => _webhook.NewMap(mapname));
         }
+
         private HookResult OnGameEnd(EventCsWinPanelMatch @event, GameEventInfo info)
         {
             if (!_g.WConfig.GameEndScoreboard) return HookResult.Continue;

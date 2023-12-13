@@ -2,11 +2,6 @@
 {
     internal class Query : IQuery
     {
-        private static HttpClient CreateHttpClient()
-        {
-            return new HttpClient();
-        }
-
         public async Task<string> GetCountryCodeAsync(string ipAddress)
         {
             using var client = CreateHttpClient();
@@ -34,25 +29,6 @@
             }
         }
 
-        /*  public async Task<string> GetIPAsync()
-          {
-              using var client = CreateHttpClient();
-              try
-              {
-                  string apiUrl = "https://api.ipify.org";
-                  HttpResponseMessage response = await client.GetAsync(apiUrl).ConfigureAwait(false);
-                  response.EnsureSuccessStatusCode();
-                  string serverip = await response.Content.ReadAsStringAsync();
-                  DSLog.Log(0, $"Finished getting IP Address: {serverip}");
-                  return serverip;
-              }
-              catch (Exception ex)
-              {
-                  DSLog.Log(2, $"Exception in GetIPAsync: {ex.Message}");
-                  return "IP Error";
-              }
-          }*/
-
         public async Task<string> IPQueryAsync(string ipAddress, string endpoint)
         {
             using var client = CreateHttpClient();
@@ -73,5 +49,29 @@
                 return "Error";
             }
         }
+
+        private static HttpClient CreateHttpClient()
+        {
+            return new HttpClient();
+        }
+
+        /*  public async Task<string> GetIPAsync()
+          {
+              using var client = CreateHttpClient();
+              try
+              {
+                  string apiUrl = "https://api.ipify.org";
+                  HttpResponseMessage response = await client.GetAsync(apiUrl).ConfigureAwait(false);
+                  response.EnsureSuccessStatusCode();
+                  string serverip = await response.Content.ReadAsStringAsync();
+                  DSLog.Log(0, $"Finished getting IP Address: {serverip}");
+                  return serverip;
+              }
+              catch (Exception ex)
+              {
+                  DSLog.Log(2, $"Exception in GetIPAsync: {ex.Message}");
+                  return "IP Error";
+              }
+          }*/
     }
 }

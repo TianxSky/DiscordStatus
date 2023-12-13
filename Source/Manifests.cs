@@ -8,6 +8,5 @@
         public override string ModuleVersion => "v3.1";
         public override string ModuleAuthor => "Tian";
         public override string ModuleDescription => "Showing Server Status on Discord";
-
     }
 }

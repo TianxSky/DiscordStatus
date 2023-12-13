@@ -6,12 +6,14 @@ namespace DiscordStatus
     {
         internal static string? FileDir;
         internal static string? FilePath;
+
         internal static void GetPath(string ModuleDirectory, string ModuleName)
         {
             string? parentDirectory = Directory.GetParent(path: Directory.GetParent(ModuleDirectory).FullName)?.FullName;
             FileDir = Path.Combine(parentDirectory, @$"configs/plugins/{ModuleName}");
             FilePath = Path.Combine(FileDir, $"{ModuleName}.json");
         }
+
         internal static async Task UpdateAsync(Globals globals)
         {
             try
@@ -68,7 +70,6 @@ namespace DiscordStatus
             await File.WriteAllTextAsync(FilePath, updatedJson);
             DSLog.Log(1, $"Saved {propertyName} to {className} in DSconfig.");
         }
-
 
         internal static async Task RenameAsync(DSconfig Config)
         {
