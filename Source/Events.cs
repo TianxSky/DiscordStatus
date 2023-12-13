@@ -1,6 +1,5 @@
 ﻿using CounterStrikeSharp.API;
 using CounterStrikeSharp.API.Core;
-using CounterStrikeSharp.API.Modules.Cvars;
 
 namespace DiscordStatus
 {
@@ -17,16 +16,23 @@ namespace DiscordStatus
             RegisterEventHandler<EventRoundEnd>(OnRoundEnd);
             RegisterEventHandler<EventCsWinPanelMatch>(OnGameEnd);
             //RegisterEventHandler<EventPlayerDeath>(OnPlayerDeath);
-            RegisterEventHandler<EventGameNewmap>(OnGameNewmap);
+            //RegisterEventHandler<EventGameNewmap>(OnGameNewmap);
         }
 
         private void OnMapStart(string mapName)
         {
-            DSLog.Log(1, $"Map {mapName} started!");
-            _g.MapName = mapName;
-            _g.HostPort = ConVar.Find("hostport")!.GetPrimitiveValue<int>().ToString();
-            _g.MaxPlayers = Server.MaxPlayers;
-            Task.Run(async () => await LoadDiscordStatusAsync());
+            if (!init)
+            {
+                DSLog.Log(1, $"Map {mapName} started!");
+                _g.MapName = mapName;
+                _g.MaxPlayers = Server.MaxPlayers;
+                Task.Run(LoadDiscordStatusAsync);
+                init = true;
+            }
+            else
+            {
+                OnNewMap(mapName);
+            }
         }
         private HookResult OnPlayerConnectFull(EventPlayerConnectFull @event, GameEventInfo info)
         {
@@ -34,27 +40,27 @@ namespace DiscordStatus
             if (!_chores.IsPlayerValid(player)) return HookResult.Continue;
             /*AddTimer(2.0f, () =>
             {*/
-                PlayerInfo playerInfo = new()
-                {
-                    UserId = player?.UserId,
-                    Index = (int)player?.Index,
-                    SteamId = player?.AuthorizedSteamID?.SteamId64.ToString(),
-                    Name = player?.PlayerName,
-                    IpAddress = player?.IpAddress?.Split(":")[0],
-                    Clan = player?.Clan
-                };
-                if (_g.HasRC)
-                {
-                    Task.Run(async () => playerInfo.Region = await _query.IPQueryAsync(playerInfo.IpAddress, "region_code").ConfigureAwait(false) ?? string.Empty);
-                }
+            PlayerInfo playerInfo = new()
+            {
+                UserId = player?.UserId,
+                Index = (int)player?.Index,
+                SteamId = player?.AuthorizedSteamID?.SteamId64.ToString(),
+                Name = player?.PlayerName,
+                IpAddress = player?.IpAddress?.Split(":")[0],
+                Clan = player?.Clan
+            };
+            if (_g.HasRC)
+            {
+                Task.Run(async () => playerInfo.Region = await _query.IPQueryAsync(playerInfo.IpAddress, "region_code").ConfigureAwait(false) ?? string.Empty);
+            }
 
-                if (_g.HasCC)
-                {
-                    Task.Run(async () => playerInfo.Country = await _query.GetCountryCodeAsync(playerInfo.IpAddress).ConfigureAwait(false) ?? string.Empty);
-                }
+            if (_g.HasCC)
+            {
+                Task.Run(async () => playerInfo.Country = await _query.GetCountryCodeAsync(playerInfo.IpAddress).ConfigureAwait(false) ?? string.Empty);
+            }
 
-                _g.PlayerList.Add(playerInfo);
-           /* });*/
+            _g.PlayerList.Add(playerInfo);
+            /* });*/
             return HookResult.Continue;
         }
 
@@ -110,12 +116,12 @@ namespace DiscordStatus
 
             return HookResult.Continue;
         }
-        private HookResult OnGameNewmap(EventGameNewmap @event, GameEventInfo info)
+        private void OnNewMap(string mapname)
         {
-            if (!_g.WConfig.NewMapNotification) return HookResult.Continue;
-            _g.MapName = @event.Mapname;
-            Task.Run(() => _webhook.NewMap(@event.Mapname));
-            return HookResult.Continue;
+            DSLog.Log(1, $"Map {_g.MapName} changed to {mapname}! {_g.WConfig.NewMapNotification}");
+            if (!_g.WConfig.NewMapNotification) return;
+            _g.MapName = mapname;
+            Task.Run(() => _webhook.NewMap(mapname));
         }
         private HookResult OnGameEnd(EventCsWinPanelMatch @event, GameEventInfo info)
         {

@@ -1,6 +1,5 @@
 using CounterStrikeSharp.API;
 using CounterStrikeSharp.API.Core;
-using CounterStrikeSharp.API.Modules.Cvars;
 
 
 namespace DiscordStatus
@@ -13,6 +12,7 @@ namespace DiscordStatus
         private readonly IQuery _query;
         private readonly IChores _chores;
         private readonly Globals _g;
+        private bool init = false;
         public DSconfig Config { get; set; }
         public DiscordStatus(IWebhook webhook, IQuery query, IChores chores, Globals g)
         {
@@ -43,7 +43,6 @@ namespace DiscordStatus
             }
             else
             {
-                _g.HostPort = ConVar.Find("hostport")!.GetPrimitiveValue<int>().ToString();
                 DSLog.Log(0, "Hot Reloading, try starting bot!");
                 await LoadDiscordStatusAsync();
             }
@@ -85,7 +84,7 @@ namespace DiscordStatus
         private async Task LoadDiscordStatusAsync()
         {
             DSLog.Log(0, "Starting~");
-            _g.ConnectURL = _chores.IsURLValid(_g.GConfig.PHPURL) ? string.Concat(_g.GConfig.PHPURL, $"?ip={_g.ServerIP}:{_g.HostPort}") : "ConnectURL Error";
+            _g.ConnectURL = _chores.IsURLValid(_g.GConfig.PHPURL) ? string.Concat(_g.GConfig.PHPURL, $"?ip={_g.ServerIP}") : "ConnectURL Error";
             if (_chores.IsURLValid(_g.WConfig.StatusWebhookURL))
             {
                 //webhookClient.ModifyWebhookAsync(x => x.Image = );
@@ -113,7 +112,7 @@ namespace DiscordStatus
                     AddTimer(2.0f, () =>
                     {
                         var _players = Utilities.GetPlayers();
-                        foreach(var _player in _players)
+                        foreach (var _player in _players)
                         {
                             _chores.UpdatePlayer(_player);
                         };

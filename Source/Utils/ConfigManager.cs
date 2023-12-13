@@ -26,7 +26,7 @@ namespace DiscordStatus
                 globals.ServerIP = configData.GeneralConfig.ServerIP;
                 globals.MessageID = configData.WebhookConfig.StatusMessageID;
                 globals.NameFormat = configData.EmbedConfig.NameFormat;
-                globals.ConnectURL = string.Concat(configData.GeneralConfig.PHPURL, $"?ip={globals.ServerIP}:{globals.HostPort}");
+                globals.ConnectURL = string.Concat(configData.GeneralConfig.PHPURL, $"?ip={globals.ServerIP}");
 
                 DSLog.Log(1, "Read configuration data successfully.");
             }

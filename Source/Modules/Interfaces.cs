@@ -1,7 +1,5 @@
 ﻿using CounterStrikeSharp.API.Core;
 using Discord;
-using System;
-using System.Linq;
 
 namespace DiscordStatus
 {

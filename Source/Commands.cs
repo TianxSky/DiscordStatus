@@ -7,15 +7,23 @@ namespace DiscordStatus
 {
     public partial class DiscordStatus
     {
+        private DateTime _globalCooldown = DateTime.MinValue;
+        private readonly TimeSpan _globalCooldownDuration = TimeSpan.FromSeconds(60);
         [ConsoleCommand("css_request", "Request players from discord")]
-        [RequiresPermissions("@css/generic")]
         public async void RequestPlayers(CCSPlayerController? player, CommandInfo command)
         {
             if (_chores.IsPlayerValid(player))
             {
+                if (IsGlobalCooldownActive())
+                {
+                    DSLog.LogToChat(player, "{RED}Command is on global cooldown. Please wait.");
+                    return;
+                }
+
                 if (_chores.IsURLValid(_g.WConfig.StatusWebhookURL))
                 {
                     await _webhook.RequestPlayers(player.PlayerName);
+                    SetGlobalCooldown();
                     if (!_chores.IsPlayerValid(player)) return;
                     DSLog.LogToChat(player, "{GREEN}Request Sent");
                 }
@@ -41,16 +49,27 @@ namespace DiscordStatus
             DSLog.LogToChat(player, $"{{GREEN}}Name format updated to '{names}'!");
         }
 
-        [ConsoleCommand("css_update_settings", "update embed config settings")]
+        [ConsoleCommand("css_update_settings", "update config settings")]
         [RequiresPermissions("@css/root")]
-        public async void UpdateEmbedConfig(CCSPlayerController? player, CommandInfo command)
+        public async void UpdateSettings(CCSPlayerController? player, CommandInfo command)
         {
             _update.Stop();
             await ConfigManager.UpdateAsync(_g);
             await UpdateAsync();
             _update.Start();
             if (!_chores.IsPlayerValid(player)) return;
-            DSLog.LogToChat(player, "{GREEN}Updated Embed with the updated config settings!");
+            DSLog.LogToChat(player, $"color: {_g.EConfig.RandomColor}{_chores.GetEmbedColor()}");
+            DSLog.LogToChat(player, "{GREEN}Updated config settings!");
+        }
+
+        private bool IsGlobalCooldownActive()
+        {
+            return DateTime.Now - _globalCooldown < _globalCooldownDuration;
+        }
+
+        private void SetGlobalCooldown()
+        {
+            _globalCooldown = DateTime.Now;
         }
     }
 }

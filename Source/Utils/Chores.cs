@@ -1,20 +1,19 @@
-﻿using CounterStrikeSharp.API.Core;
-using Discord;
-using System.Security.Cryptography;
+﻿using System.Security.Cryptography;
 using System.Text;
 using System.Text.RegularExpressions;
+using CounterStrikeSharp.API.Core;
+using Discord;
 
 namespace DiscordStatus
 {
     public class Chores : IChores
     {
         private readonly Globals _g;
-        private readonly EmbedConfig EConfig;
+        EmbedConfig EConfig => _g.EConfig;
 
         public Chores(Globals globals)
         {
             _g = globals;
-            EConfig = globals.EConfig;
 
         }
         public bool IsPlayerValid(CCSPlayerController? player)
@@ -67,7 +66,6 @@ namespace DiscordStatus
             _g.CtPlayersName.Clear();
             var sorted = _g.PlayerList?.OrderByDescending(i => i.Kills);
             _g.PlayerList = sorted.ToList();
-            DSLog.Log(1, $"Sorted [{_g.PlayerList?.Count}] players");
         }
         public string FormatStats(PlayerInfo playerinfo)
         {

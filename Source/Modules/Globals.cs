@@ -1,7 +1,4 @@
-﻿using System;
-using System.Linq;
-
-namespace DiscordStatus
+﻿namespace DiscordStatus
 {
     public class Globals
     {
@@ -10,7 +7,6 @@ namespace DiscordStatus
         public EmbedConfig EConfig { get; set; } = new();
         public DSconfig Config { get; set; } = new();
         public string? ServerIP { get; set; }
-        public string? HostPort { get; set; }
         public string? ConnectURL { get; set; }
         public string? NameFormat { get; set; }
         public int MaxPlayers { get; set; }

@@ -1,5 +1,4 @@
-﻿using System.Xml.Linq;
-using Discord;
+﻿using Discord;
 using Discord.Webhook;
 
 namespace DiscordStatus
@@ -85,7 +84,7 @@ namespace DiscordStatus
                 builder
                     .AddField(EConfig.CTField.Replace("{SCORE}", _g.CTScore.ToString()), ctnames, inline: EConfig.PlayersInline)
                     .AddField(EConfig.TField.Replace("{SCORE}", _g.TScore.ToString()), tnames, inline: EConfig.PlayersInline)
-                    .AddField("ㅤ", _chores.IsURLValid(GConfig.PHPURL) ? $"[**`connect {_g.ServerIP}:{_g.HostPort}`**]({_g.ConnectURL})ㅤ👈 Join Here" : $"**`connect {_g.ServerIP}:{_g.HostPort}`**ㅤ👈 Join Here")
+                    .AddField("ㅤ", _chores.IsURLValid(GConfig.PHPURL) ? $"[**`connect {_g.ServerIP}`**]({_g.ConnectURL})ㅤ👈 Join Here" : $"**`connect {_g.ServerIP}`**ㅤ👈 Join Here")
                     .WithColor(_chores.GetEmbedColor())
                     .WithCurrentTimestamp();
                 _ = _chores.IsURLValid(_g.ConnectURL) ? builder.WithUrl(_g.ConnectURL) : null;
@@ -98,7 +97,7 @@ namespace DiscordStatus
                     .WithTitle(EConfig.Title)
                     .AddField(EConfig.MapField, $"```ansi\r\n\u001b[2;31m{_g.MapName}\u001b[0m\r\n```", inline: true)
                     .AddField(EConfig.OnlineField, "```ansi\n[2;33m[2;31mServer Empty[0m[2;33m[0m[2;33m[0m\n```", inline: true)
-                    .AddField("ㅤ", _chores.IsURLValid(GConfig.PHPURL) ? $"[**`connect {_g.ServerIP}:{_g.HostPort}`**]( {_g.ConnectURL})ㅤ👈 Join Here" : $"**`connect {_g.ServerIP}:{_g.HostPort}`**ㅤ👈 Join Here")
+                    .AddField("ㅤ", _chores.IsURLValid(GConfig.PHPURL) ? $"[**`connect {_g.ServerIP}`**]( {_g.ConnectURL})ㅤ👈 Join Here" : $"**`connect {_g.ServerIP}`**ㅤ👈 Join Here")
                     .WithColor(_chores.GetEmbedColor())
                     .WithCurrentTimestamp();
                 _ = _chores.IsURLValid(_g.ConnectURL) ? builder.WithUrl(_g.ConnectURL) : null;
@@ -133,11 +132,11 @@ namespace DiscordStatus
         }
         public async Task RequestPlayers(string name)
         {
-            using var webhookClient = CreateWebhookClient(WConfig.NotifyWebhookURL);
+            using var webhookClient = CreateWebhookClient(WConfig.RequestPlayersURL);
             if (webhookClient == null) return;
             var builder = new EmbedBuilder()
                 .WithTitle(EConfig.Title)
-                .WithDescription($"||<@&{WConfig.NotifyMembersRoleID}>||\n```ansi\r\n\u001b[2;31m[Admin] {name} is requesting players to join the server\u001b[0m\r\n```")
+                .WithDescription($"||<@&{WConfig.NotifyMembersRoleID}>||\n```ansi\r\n\u001b[2;31m{name} is requesting players to join the server\u001b[0m\r\n```")
                 .AddField($"{EConfig.MapField}", $"```ansi\r\n\u001b[2;31m{_g.MapName}\u001b[0m\r\n```", inline: true)
                 .AddField(EConfig.OnlineField, $"```ansi\r\n\u001b[2;31m{_g.PlayerList.Count}\u001b[0m/\u001b[2;32m{_g.MaxPlayers}\u001b[0m\r\n```", inline: true)
                 .WithColor(new Color(255, 0, 0))
@@ -151,15 +150,15 @@ namespace DiscordStatus
             using var webhookClient = CreateWebhookClient(WConfig.NotifyWebhookURL);
             if (webhookClient == null) return;
             var builder = new EmbedBuilder()
-                .WithTitle(EConfig.Title + "(Map Change)")
+                .WithTitle(EConfig.Title)
                 .WithDescription($"```ansi\r\n\u001b[2;31mMap changed to {mapname}, Join Now\u001b[0m\r\n```")
                 .AddField($"{EConfig.MapField}", $"```ansi\r\n\u001b[2;31m{mapname}\u001b[0m\r\n```", inline: true)
                 .AddField(EConfig.OnlineField, $"```ansi\r\n\u001b[2;31m{_g.PlayerList.Count}\u001b[0m/\u001b[2;32m{_g.MaxPlayers}\u001b[0m\r\n```", inline: true)
-                .AddField("ㅤ", _chores.IsURLValid(GConfig.PHPURL) ? $"[**`connect {_g.ServerIP}:{_g.HostPort}`**]({_g.ConnectURL})ㅤ👈 Join Here" : $"**`connect {_g.ServerIP}:{_g.HostPort}`**ㅤ👈 Join Here")
+                .AddField("ㅤ", _chores.IsURLValid(GConfig.PHPURL) ? $"[**`connect {_g.ServerIP}`**]({_g.ConnectURL})ㅤ👈 Join Here" : $"**`connect {_g.ServerIP}`**ㅤ👈 Join Here")
                 .WithColor(_chores.GetEmbedColor())
                 .WithCurrentTimestamp();
             _ = _chores.IsURLValid(_g.ConnectURL) ? builder.WithUrl(_g.ConnectURL) : null;
-            _ = _chores.IsURLValid(EConfig.MapImg) ? builder.WithImageUrl(EConfig.MapImg.Replace("{MAPNAME}", _g.MapName)) : null;
+            _ = _chores.IsURLValid(EConfig.MapImg) ? builder.WithImageUrl(EConfig.MapImg.Replace("{MAPNAME}", mapname)) : null;
             builder.Build();
             await webhookClient.SendMessageAsync(embeds: new[] { builder.Build() });
         }
@@ -188,7 +187,7 @@ namespace DiscordStatus
                 }
                 var builder = new EmbedBuilder()
                     .WithTitle(EConfig.Title)
-                    .WithDescription($"```ansi\r\n\u001b[2;31mServer: {_g.ServerIP}:{_g.HostPort}\nGameID: {timestamp} \u001b[0m\r\n```Time: <t:{timestamp}:f>")
+                    .WithDescription($"```ansi\r\n\u001b[2;31mServer: {_g.ServerIP}\nGameID: {timestamp} \u001b[0m\r\n```Time: <t:{timestamp}:f>")
                     .AddField($"{EConfig.MapField}", $"```ansi\r\n\u001b[2;31m{_g.MapName}\u001b[0m\r\n```", inline: true)
                     .AddField(EConfig.OnlineField, $"```ansi\r\n\u001b[2;31m{_g.PlayerList.Count}\u001b[0m/\u001b[2;32m{_g.MaxPlayers}\u001b[0m\r\n```", inline: true)
                     .AddField($"{EConfig.MVPField}", $"[{_chores.FormatStats(mvp)}]({steamlink})", inline: false)

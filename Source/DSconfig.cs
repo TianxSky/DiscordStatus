@@ -1,7 +1,7 @@
 namespace DiscordStatus
 {
-    using CounterStrikeSharp.API.Core;
     using System.Text.Json.Serialization;
+    using CounterStrikeSharp.API.Core;
 
     public sealed class DSconfig : BasePluginConfig
     {
@@ -15,7 +15,7 @@ namespace DiscordStatus
         public EmbedConfig EmbedConfig { get; set; } = new EmbedConfig();
 
         [JsonPropertyName("Version")]
-        public override int Version { get; set; } = 4;
+        public override int Version { get; set; } = 5;
     }
     public sealed class GeneralConfig
     {
@@ -86,6 +86,9 @@ namespace DiscordStatus
 
         [JsonPropertyName("NotifyWebhookURL")]
         public string NotifyWebhookURL { get; set; } = "";
+
+        [JsonPropertyName("RequestPlayersURL")]
+        public string RequestPlayersURL { get; set; } = "";
 
         [JsonPropertyName("ScoreboardURL")]
         public string ScoreboardURL { get; set; } = "";
