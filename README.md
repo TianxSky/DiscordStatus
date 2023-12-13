@@ -30,7 +30,7 @@ This CSSharp plugin allows monitoring server status from discord with cute embed
 ```json
 {
   "GeneralConfig": {
-    "ServerIP": "asd.asd", // actual ip address or custom domain: playcs2.com
+    "ServerIP": "8.8.8.8:27025", // actual ip address or custom domain: playcs2.com
     "UpdateInterval": 45,
     "PHPURL": "https://playcs2.com/connect.php"
   },
