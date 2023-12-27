@@ -140,7 +140,7 @@ namespace DiscordStatus
 
             var _teams = Utilities.FindAllEntitiesByDesignerName<CCSTeam>("cs_team_manager");
             _chores.GetScore(_teams);
-            var mvp = _g.TScore > _g.CTScore ? _g.TPlayersName.FirstOrDefault() : _g.CtPlayersName.FirstOrDefault();
+            var mvp = _g.TScore >= _g.CTScore ? _g.TPlayersName.FirstOrDefault() : _g.CtPlayersName.FirstOrDefault();
             Task.Run(() => _webhook.GameEnd(mvp));
             return HookResult.Continue;
         }
