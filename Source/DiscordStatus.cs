@@ -60,7 +60,7 @@ namespace DiscordStatus
         public void OnConfigParsed(DSconfig config)
         {
             ConfigManager.GetPath(ModuleDirectory, ModuleName);
-            if (config.Version < _g.Config.Version | config.Version == null)
+            if (config.Version == null || config.Version < _g.Config.Version)
             {
                 DSLog.Log(2, $"Config version mismatch (Expected: {_g.Config.Version} | Current: {config.Version})");
                 Task.Run(async () => await ConfigManager.RenameAsync(_g.Config));
