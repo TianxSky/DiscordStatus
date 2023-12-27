@@ -30,26 +30,26 @@ This CSSharp plugin allows monitoring server status from discord with cute embed
 ```json
 {
   "GeneralConfig": {
-    "ServerIP": "8.8.8.8:27025", // actual ip address or custom domain: playcs2.com
-    "UpdateInterval": 45,
-    "PHPURL": "https://playcs2.com/connect.php"
+    "ServerIP": "77.77.77.77:27027",
+    "UpdateInterval": 30,
+    "PHPURL": "https://okand.com/connect.php"
   },
   "WebhookConfig": {
     "NotifyMembersRoleID": 0,
-    "NewMapNotification": false,
+    "NewMapNotification": true,
     "GameEndScoreboard": true,
-    "NotifyWebhookURL": "",
-    "RequestPlayersURL": "",
-    "ScoreboardURL": "",
-    "StatusWebhookURL": "",
+    "NotifyWebhookURL": "https://discord.com/api/webhooks/",
+    "RequestPlayersURL": "https://discord.com/api/webhooks/,https://discord.com/api/webhooks/",
+    "ScoreboardURL": "https://discord.com/api/webhooks/",
+    "StatusWebhookURL": "https://discord.com/api/webhooks/",
     "StatusMessageID": 0
   },
   "EmbedConfig": {
-    "Title": "",
-    "MapImg": "{MAPNAME}.gif.jpg.png",
-    "OfflineImg": "",
-    "IdleImg": "{MAPNAME}.jpg/asdadsads.gif",
-    "RequestImg": "",
+    "Title": "my cs2 server",
+    "MapImg": "{MAPNAME}.jpg.png.gif",
+    "OfflineImg": ".jpg.png.gif",
+    "IdleImg": ".jpg.png.gif",
+    "RequestImg": ".jpg.png.gif",
     "EmbedColor": "#00ffff",
     "RandomColor": true,
     "MapField": "🗺️ㅤMap",
@@ -58,9 +58,14 @@ This CSSharp plugin allows monitoring server status from discord with cute embed
     "TField": "T :ㅤ{SCORE}",
     "MVPField": " 👑ㅤMVP ",
     "NameFormat": "{FLAG}{CLAN} {NAME}: {K} - {D}",
+    "EmbedSteamLink": true,
+    "RequestPlayers": "is requesting players to join the server",
+    "MapChange": "Map changed to {mapname}, Join Now",
+    "ServerEmpty": "Server Empty",
+    "JoinHere": "👈 Join Here",
     "PlayersInline": true
   },
-  "Version": 4
+  "ConfigVersion": 5
 }
 ```
 ```
