@@ -30,26 +30,26 @@ This CSSharp plugin allows monitoring server status from discord with cute embed
 ```json
 {
   "GeneralConfig": {
-    "ServerIP": "8.8.8.8:27025", // actual ip address or custom domain: playcs2.com
-    "UpdateInterval": 45,
-    "PHPURL": "https://playcs2.com/connect.php"
+    "ServerIP": "77.77.77.77:27027",
+    "UpdateInterval": 30,
+    "PHPURL": "https://okand.com/connect.php"
   },
   "WebhookConfig": {
     "NotifyMembersRoleID": 0,
-    "NewMapNotification": false,
+    "NewMapNotification": true,
     "GameEndScoreboard": true,
-    "NotifyWebhookURL": "",
-    "RequestPlayersURL": "",
-    "ScoreboardURL": "",
-    "StatusWebhookURL": "",
+    "NotifyWebhookURL": "https://discord.com/api/webhooks/",
+    "RequestPlayersURL": "https://discord.com/api/webhooks/,https://discord.com/api/webhooks/",
+    "ScoreboardURL": "https://discord.com/api/webhooks/",
+    "StatusWebhookURL": "https://discord.com/api/webhooks/",
     "StatusMessageID": 0
   },
   "EmbedConfig": {
-    "Title": "",
-    "MapImg": "{MAPNAME}.gif.jpg.png",
-    "OfflineImg": "",
-    "IdleImg": "{MAPNAME}.jpg/asdadsads.gif",
-    "RequestImg": "",
+    "Title": "my cs2 server",
+    "MapImg": "{MAPNAME}.jpg.png.gif",
+    "OfflineImg": ".jpg.png.gif",
+    "IdleImg": ".jpg.png.gif",
+    "RequestImg": ".jpg.png.gif",
     "EmbedColor": "#00ffff",
     "RandomColor": true,
     "MapField": "🗺️ㅤMap",
@@ -58,9 +58,14 @@ This CSSharp plugin allows monitoring server status from discord with cute embed
     "TField": "T :ㅤ{SCORE}",
     "MVPField": " 👑ㅤMVP ",
     "NameFormat": "{FLAG}{CLAN} {NAME}: {K} - {D}",
+    "EmbedSteamLink": true,
+    "RequestPlayers": "is requesting players to join the server",
+    "MapChange": "Map changed to {mapname}, Join Now",
+    "ServerEmpty": "Server Empty",
+    "JoinHere": "👈 Join Here",
     "PlayersInline": true
   },
-  "Version": 4
+  "ConfigVersion": 5
 }
 ```
 ```
@@ -82,8 +87,10 @@ For imageurl u can also use "https://image.gametracker.com/images/maps/160x120/c
 ![image](https://github.com/Tian7777/DiscordStatus/assets/41808115/1b64768f-7ebe-4020-957c-8f9b514f988b)
 ## Server With Players(Custom Map Img / Custom Img):
 ![image](https://github.com/Tian7777/DiscordStatus/assets/41808115/0bba2635-886c-47ac-a7b6-c49b7fc0f53e)
+## Server With Players(With Steam hyperlinks):
+![image](https://github.com/Tian7777/DiscordStatus/assets/41808115/a7e93c64-e76b-403e-99a2-3e3fd0809f3a)
 ## Scoreboard Snapshot
-![image](https://github.com/Tian7777/DiscordStatus/assets/41808115/4d760cff-0483-4694-a1f2-97fb139b02f0)
+![image](https://github.com/Tian7777/DiscordStatus/assets/41808115/dd4b28dd-e30c-4173-84c8-eb1c8aaca074)
 ## Request Players:
 ![image](https://github.com/Tian7777/DiscordStatus/assets/41808115/e50e0298-0581-485f-a1d6-46c6d9421bbd)
 
