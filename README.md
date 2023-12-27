@@ -87,8 +87,10 @@ For imageurl u can also use "https://image.gametracker.com/images/maps/160x120/c
 ![image](https://github.com/Tian7777/DiscordStatus/assets/41808115/1b64768f-7ebe-4020-957c-8f9b514f988b)
 ## Server With Players(Custom Map Img / Custom Img):
 ![image](https://github.com/Tian7777/DiscordStatus/assets/41808115/0bba2635-886c-47ac-a7b6-c49b7fc0f53e)
+## Server With Players(With Steam hyperlinks):
+![image](https://github.com/Tian7777/DiscordStatus/assets/41808115/a7e93c64-e76b-403e-99a2-3e3fd0809f3a)
 ## Scoreboard Snapshot
-![image](https://github.com/Tian7777/DiscordStatus/assets/41808115/4d760cff-0483-4694-a1f2-97fb139b02f0)
+![image](https://github.com/Tian7777/DiscordStatus/assets/41808115/dd4b28dd-e30c-4173-84c8-eb1c8aaca074)
 ## Request Players:
 ![image](https://github.com/Tian7777/DiscordStatus/assets/41808115/e50e0298-0581-485f-a1d6-46c6d9421bbd)
 
