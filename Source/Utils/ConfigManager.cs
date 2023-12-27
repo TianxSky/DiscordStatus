@@ -22,6 +22,7 @@ namespace DiscordStatus
                 var configData = JsonConvert.DeserializeObject<DSconfig>(json);
 
                 // Update the properties in the provided Globals instance
+                globals.Config = configData;
                 globals.GConfig = configData.GeneralConfig;
                 globals.WConfig = configData.WebhookConfig;
                 globals.EConfig = configData.EmbedConfig;
@@ -29,12 +30,18 @@ namespace DiscordStatus
                 globals.MessageID = configData.WebhookConfig.StatusMessageID;
                 globals.NameFormat = configData.EmbedConfig.NameFormat;
                 globals.ConnectURL = string.Concat(configData.GeneralConfig.PHPURL, $"?ip={globals.ServerIP}");
-
+                globals.HasCC = configData.EmbedConfig.NameFormat.Contains("{CC}") || configData.EmbedConfig.NameFormat.Contains("{FLAG}");
+                globals.HasRC = configData.EmbedConfig.NameFormat.Contains("{RC}");
                 DSLog.Log(1, "Read configuration data successfully.");
+            }
+            catch (JsonException ex)
+            {
+                DSLog.Log(2, $"Failed deserializing json: {ex.Message}");
             }
             catch (Exception ex)
             {
                 DSLog.Log(2, $"Failed to read configuration data: {ex.Message}");
+                throw;
             }
         }
 

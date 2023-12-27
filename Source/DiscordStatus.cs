@@ -60,7 +60,7 @@ namespace DiscordStatus
         public void OnConfigParsed(DSconfig config)
         {
             ConfigManager.GetPath(ModuleDirectory, ModuleName);
-            if (config.Version < _g.Config.Version)
+            if (config.Version < _g.Config.Version | config.Version == null)
             {
                 DSLog.Log(2, $"Config version mismatch (Expected: {_g.Config.Version} | Current: {config.Version})");
                 Task.Run(async () => await ConfigManager.RenameAsync(_g.Config));
@@ -85,21 +85,14 @@ namespace DiscordStatus
         {
             DSLog.Log(0, "Starting~");
             _g.ConnectURL = _chores.IsURLValid(_g.GConfig.PHPURL) ? string.Concat(_g.GConfig.PHPURL, $"?ip={_g.ServerIP}") : "ConnectURL Error";
-            if (_chores.IsURLValid(_g.WConfig.StatusWebhookURL))
+            //webhookClient.ModifyWebhookAsync(x => x.Image = );
+            await _webhook.InitialMessageAsync();
+            if (_g.MessageID != 0)
             {
-                //webhookClient.ModifyWebhookAsync(x => x.Image = );
-                await _webhook.InitialMessageAsync();
-                if (_g.WConfig.StatusMessageID != 0)
-                {
-                    _update = new System.Timers.Timer(TimeSpan.FromSeconds(_g.GConfig.UpdateInterval).TotalMilliseconds);
-                    _update.Elapsed += async (sender, e) => await UpdateAsync();
-                    _update.Start();
-                    DSLog.Log(1, "Initialization completed successfully!");
-                }
-            }
-            else
-            {
-                DSLog.Log(2, "Webhook URL is not set up");
+                _update = new System.Timers.Timer(TimeSpan.FromSeconds(_g.GConfig.UpdateInterval).TotalMilliseconds);
+                _update.Elapsed += async (sender, e) => await UpdateAsync();
+                _update.Start();
+                DSLog.Log(1, "Initialization completed successfully!");
             }
         }
 
@@ -109,29 +102,31 @@ namespace DiscordStatus
             {
                 Server.NextFrame(() =>
                 {
-                    AddTimer(2.0f, () =>
+                    var _players = Utilities.GetPlayers().Where(p => _chores.IsPlayerValid(p));
+                    foreach (var player in _players)
                     {
-                        var _players = Utilities.GetPlayers();
-                        foreach (var _player in _players)
-                        {
-                            _chores.UpdatePlayer(_player);
-                        };
-                    });
+                        _chores.UpdatePlayer(player);
+                    }
+
+                    var players = _g.PlayerList;
+
+                    if (players.Count > 0)
+                    {
+                        _chores.SortPlayers();
+
+                        var tPlayerList = players
+                            .Where(kv => kv.Value != null && kv.Value.TeamID == 2)
+                            .Select(kv => _chores.FormatStats(kv.Value));
+
+                        var ctPlayerList = players
+                            .Where(kv => kv.Value != null && kv.Value.TeamID == 3)
+                            .Select(kv => _chores.FormatStats(kv.Value));
+
+                        _g.TPlayersName.AddRange(tPlayerList);
+                        _g.CtPlayersName.AddRange(ctPlayerList);
+                    }
                 });
             });
-
-            var players = _g.PlayerList;
-
-            if (players.Count > 0)
-            {
-                _chores.SortPlayers();
-
-                var tPlayerList = players.Where(player => player.TeamID == 2).Select(player => _chores.FormatStats(player));
-                var crPlayerList = players.Where(player => player.TeamID == 3).Select(player => _chores.FormatStats(player));
-
-                _g.TPlayersName.AddRange(tPlayerList);
-                _g.CtPlayersName.AddRange(crPlayerList);
-            }
 
             await _webhook.UpdateEmbed();
         }

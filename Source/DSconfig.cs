@@ -14,7 +14,7 @@ namespace DiscordStatus
         [JsonPropertyName("EmbedConfig")]
         public EmbedConfig EmbedConfig { get; set; } = new EmbedConfig();
 
-        [JsonPropertyName("Version")]
+        [JsonPropertyName("ConfigVersion")]
         public override int Version { get; set; } = 5;
     }
 
@@ -70,6 +70,21 @@ namespace DiscordStatus
 
         [JsonPropertyName("NameFormat")]
         public string NameFormat { get; set; } = "{FLAG}{CLAN} {NAME}: {K} - {D}";
+
+        [JsonPropertyName("EmbedSteamLink")]
+        public bool EmbedSteamLink { get; set; } = false;
+
+        [JsonPropertyName("RequestPlayers")]
+        public string RequestPlayers { get; set; } = "is requesting players to join the server";
+
+        [JsonPropertyName("MagChange")]
+        public string MapChange { get; set; } = "Map changed to {mapname}, Join Now";
+
+        [JsonPropertyName("ServerEmpty")]
+        public string ServerEmpty { get; set; } = "Server Empty";
+
+        [JsonPropertyName("JoinHere")]
+        public string JoinHere { get; set; } = "👈 Join Here";
 
         [JsonPropertyName("PlayersInline")]
         public bool PlayersInline { get; set; } = true;

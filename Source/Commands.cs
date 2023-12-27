@@ -1,4 +1,5 @@
-﻿using CounterStrikeSharp.API.Core;
+﻿using System.Reflection;
+using CounterStrikeSharp.API.Core;
 using CounterStrikeSharp.API.Core.Attributes.Registration;
 using CounterStrikeSharp.API.Modules.Admin;
 using CounterStrikeSharp.API.Modules.Commands;
@@ -20,18 +21,14 @@ namespace DiscordStatus
                     DSLog.LogToChat(player, "{RED}Command is on global cooldown. Please wait.");
                     return;
                 }
-
-                if (_chores.IsURLValid(_g.WConfig.StatusWebhookURL))
-                {
-                    await _webhook.RequestPlayers(player.PlayerName);
-                    SetGlobalCooldown();
-                    if (!_chores.IsPlayerValid(player)) return;
-                    DSLog.LogToChat(player, "{GREEN}Request Sent");
-                }
-                else
-                {
-                    DSLog.Log(2, "Invalid webhook URL!");
-                }
+                await _webhook.RequestPlayers(player.PlayerName);
+                SetGlobalCooldown();
+                DSLog.LogToChat(player, "{GREEN}Request Sent");
+            }
+            else
+            {
+                await _webhook.RequestPlayers("Admin");
+                DSLog.Log(1, $"Request sent");
             }
         }
 

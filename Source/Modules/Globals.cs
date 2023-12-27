@@ -19,6 +19,6 @@
 
         public List<string> TPlayersName { get; set; } = new List<string>();
         public List<string> CtPlayersName { get; set; } = new List<string>();
-        public List<PlayerInfo> PlayerList { get; set; } = new List<PlayerInfo>();
+        public Dictionary<int, PlayerInfo> PlayerList { get; set; } = new();
     }
 }

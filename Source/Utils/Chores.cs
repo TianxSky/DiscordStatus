@@ -9,16 +9,19 @@ namespace DiscordStatus
     public class Chores : IChores
     {
         private readonly Globals _g;
+        private readonly IQuery _query;
 
-        public Chores(Globals globals)
+        public Chores(Globals globals, IQuery query)
         {
             _g = globals;
+            _query = query;
         }
 
         private EmbedConfig EConfig => _g.EConfig;
 
         public string FormatStats(PlayerInfo playerinfo)
         {
+            DSLog.Log(0, $"Formatting {playerinfo.Name} stats using {_g.NameFormat}");
             var nameBuilder = new StringBuilder(_g.NameFormat);
             nameBuilder.Replace("{NAME}", playerinfo.Name);
             nameBuilder.Replace("{K}", playerinfo.Kills.ToString());
@@ -30,6 +33,11 @@ namespace DiscordStatus
             nameBuilder.Replace("{FLAG}", $":flag_{playerinfo.Country.ToLower()}:");
             nameBuilder.Replace("{RC}", playerinfo.Region);
             var formattedName = nameBuilder.ToString();
+            if (EConfig.EmbedSteamLink)
+            {
+                formattedName = $"[{formattedName}](https://steamcommunity.com/profiles/{playerinfo.SteamId})";
+            }
+            DSLog.Log(0, $"Formatted {playerinfo.Name} stats to {formattedName}");
             return formattedName;
         }
 
@@ -66,9 +74,36 @@ namespace DiscordStatus
             }
         }
 
+        public void InitPlayers(CCSPlayerController player)
+        {
+            if (!IsPlayerValid(player)) return;
+            PlayerInfo playerInfo = new()
+            {
+                UserId = player?.UserId,
+                SteamId = player?.AuthorizedSteamID?.SteamId64.ToString(),
+                Name = player?.PlayerName,
+                IpAddress = player?.IpAddress?.Split(":")[0],
+                Clan = player?.Clan
+            };
+            if (_g.HasRC)
+            {
+                Task.Run(async () => playerInfo.Region = await _query.IPQueryAsync(playerInfo.IpAddress, "region_code").ConfigureAwait(false) ?? string.Empty);
+            }
+
+            if (_g.HasCC)
+            {
+                Task.Run(async () => playerInfo.Country = await _query.GetCountryCodeAsync(playerInfo.IpAddress).ConfigureAwait(false) ?? string.Empty);
+            }
+            _g.PlayerList[player.Slot] = playerInfo;
+            DSLog.Log(0, $"Player {playerInfo.Name} initialized");
+        }
+
         public bool IsPlayerValid(CCSPlayerController? player)
         {
-            return (player != null && player.IsValid && !player.IsBot && !player.IsHLTV);
+            return (player is
+            {
+                IsValid: true, IsBot: false, IsHLTV: false
+            }); ;
         }
 
         public bool IsURLValid(string? url)
@@ -82,8 +117,7 @@ namespace DiscordStatus
         {
             _g.TPlayersName.Clear();
             _g.CtPlayersName.Clear();
-            var sorted = _g.PlayerList?.OrderByDescending(i => i.Kills);
-            _g.PlayerList = sorted.ToList();
+            _g.PlayerList = _g.PlayerList.OrderByDescending(x => x.Value.Kills).ToDictionary(x => x.Key, x => x.Value);
         }
 
         public void UpdatePlayer(CCSPlayerController updatedPlayer)
@@ -91,10 +125,10 @@ namespace DiscordStatus
             var kills = updatedPlayer.ActionTrackingServices?.MatchStats.Kills ?? 0;
             var deaths = updatedPlayer.ActionTrackingServices?.MatchStats.Deaths ?? 0;
             var assists = updatedPlayer.ActionTrackingServices?.MatchStats.Assists ?? 0;
-            var clan = updatedPlayer.Clan;
+            var clan = updatedPlayer.Clan ?? "";
             var TeamID = updatedPlayer.TeamNum;
             string kdRatio = deaths != 0 ? (kills / (double)deaths).ToString("G2") : kills.ToString();
-            PlayerInfo existingPlayer = _g.PlayerList.Find(player => player.UserId == updatedPlayer.UserId);
+            _g.PlayerList.TryGetValue(updatedPlayer.Slot, out var existingPlayer);
             if (existingPlayer != null)
             {
                 existingPlayer.Kills = kills;

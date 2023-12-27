@@ -1,5 +1,6 @@
 ﻿using CounterStrikeSharp.API;
 using CounterStrikeSharp.API.Core;
+using Microsoft.Extensions.Logging;
 
 namespace DiscordStatus
 {
@@ -10,14 +11,22 @@ namespace DiscordStatus
         private void RegisterListeners()
         {
             RegisterListener<Listeners.OnMapStart>(OnMapStart);
-
-            RegisterEventHandler<EventPlayerConnectFull>(OnPlayerConnectFull);
+            RegisterListener<Listeners.OnClientAuthorized>((slot, steamid) =>
+            {
+                CCSPlayerController? player = Utilities.GetPlayerFromSlot(slot);
+                if (!_chores.IsPlayerValid(player)) return;
+                AddTimer(1.0f, () =>
+                {
+                    _chores.InitPlayers(player);
+                });
+            });
+            //RegisterEventHandler<EventPlayerConnectFull>(OnPlayerConnectFull);
             RegisterEventHandler<EventPlayerDisconnect>(OnPlayerDisconnect);
             RegisterEventHandler<EventPlayerTeam>(OnPlayerTeam);
             RegisterEventHandler<EventRoundEnd>(OnRoundEnd);
             RegisterEventHandler<EventCsWinPanelMatch>(OnGameEnd);
             //RegisterEventHandler<EventPlayerDeath>(OnPlayerDeath);
-            //RegisterEventHandler<EventGameNewmap>(OnGameNewmap);
+            //RegisterEventHandler<EventGameNewmap>(OnGameNewmap); somehow this doesnt work
         }
 
         private void OnMapStart(string mapName)
@@ -32,54 +41,38 @@ namespace DiscordStatus
             }
             else
             {
-                OnNewMap(mapName);
+                DSLog.Log(1, $"Map {_g.MapName} changed to {mapName}!");
+                if (!_g.WConfig.NewMapNotification) return;
+                var playercounts = Utilities.GetPlayers().Where(_chores.IsPlayerValid).Count();
+                _webhook.NewMap(mapName, playercounts);
+                _g.MapName = mapName;
             }
         }
 
-        private HookResult OnPlayerConnectFull(EventPlayerConnectFull @event, GameEventInfo info)
+        /*private HookResult OnPlayerConnectFull(EventPlayerConnectFull @event, GameEventInfo info)
         {
             CCSPlayerController? player = @event.Userid;
             if (!_chores.IsPlayerValid(player)) return HookResult.Continue;
-            /*AddTimer(2.0f, () =>
-            {*/
-            PlayerInfo playerInfo = new()
+            AddTimer(1.0f, () =>
             {
-                UserId = player?.UserId,
-                Index = (int)player?.Index,
-                SteamId = player?.AuthorizedSteamID?.SteamId64.ToString(),
-                Name = player?.PlayerName,
-                IpAddress = player?.IpAddress?.Split(":")[0],
-                Clan = player?.Clan
-            };
-            if (_g.HasRC)
-            {
-                Task.Run(async () => playerInfo.Region = await _query.IPQueryAsync(playerInfo.IpAddress, "region_code").ConfigureAwait(false) ?? string.Empty);
-            }
-
-            if (_g.HasCC)
-            {
-                Task.Run(async () => playerInfo.Country = await _query.GetCountryCodeAsync(playerInfo.IpAddress).ConfigureAwait(false) ?? string.Empty);
-            }
-
-            _g.PlayerList.Add(playerInfo);
-            /* });*/
+                _chores.InitPlayers(player);
+            });
             return HookResult.Continue;
-        }
+        }*/
 
         private HookResult OnPlayerDisconnect(EventPlayerDisconnect @event, GameEventInfo info)
         {
             CCSPlayerController _player = @event.Userid;
 
             if (!_chores.IsPlayerValid(_player)) return HookResult.Continue;
-            var theplayer = _g.PlayerList.Find(player => player.UserId == _player.UserId);
-            if (theplayer != null)
+            if (_g.PlayerList.TryGetValue(_player.Slot, out var theplayer))
             {
-                _g.PlayerList.Remove(theplayer);
+                _g.PlayerList.Remove(_player.Slot);
                 DSLog.Log(0, $"Removed {theplayer.Name}'s cache");
             }
             else
             {
-                DSLog.Log(2, $"Could not find player {_player.UserId}");
+                DSLog.Log(2, $"Could not find player {_player.PlayerName}");
             }
             return HookResult.Continue;
         }
@@ -91,12 +84,11 @@ namespace DiscordStatus
             if (teamid == 0) return HookResult.Continue;
             if (!_chores.IsPlayerValid(_player)) return HookResult.Continue;
             var playerList = _g.PlayerList;
-            AddTimer(2.0f, () =>
+            AddTimer(1.0f, () =>
             {
-                PlayerInfo existingPlayer = playerList.Find(player => player.UserId == _player.UserId);
-                if (existingPlayer != null)
+                if (playerList.TryGetValue(_player.Slot, out var value))
                 {
-                    existingPlayer.TeamID = teamid;
+                    value.TeamID = teamid;
                 }
                 else
                 {
@@ -119,14 +111,6 @@ namespace DiscordStatus
             return HookResult.Continue;
         }
 
-        private void OnNewMap(string mapname)
-        {
-            DSLog.Log(1, $"Map {_g.MapName} changed to {mapname}! {_g.WConfig.NewMapNotification}");
-            if (!_g.WConfig.NewMapNotification) return;
-            _g.MapName = mapname;
-            Task.Run(() => _webhook.NewMap(mapname));
-        }
-
         private HookResult OnGameEnd(EventCsWinPanelMatch @event, GameEventInfo info)
         {
             if (!_g.WConfig.GameEndScoreboard) return HookResult.Continue;
@@ -141,23 +125,24 @@ namespace DiscordStatus
             {
                 _chores.SortPlayers();
 
-                var tPlayerList = players.Where(player => player.TeamID == 2).Select(player => _chores.FormatStats(player));
-                var crPlayerList = players.Where(player => player.TeamID == 3).Select(player => _chores.FormatStats(player));
+                var tPlayerList = players
+                    .Where(kv => kv.Value != null && kv.Value.TeamID == 2)
+                    .Select(kv => _chores.FormatStats(kv.Value));
+
+                var crPlayerList = players
+                    .Where(kv => kv.Value != null && kv.Value.TeamID == 3)
+                    .Select(kv => _chores.FormatStats(kv.Value));
 
                 _g.TPlayersName.AddRange(tPlayerList);
                 _g.CtPlayersName.AddRange(crPlayerList);
             }
-            var mvp = _g.PlayerList.OrderByDescending(player => player.Kills).First();
-            if (mvp == null)
-            {
-                DSLog.Log(2, "Mvp not found");
-                return HookResult.Continue;
-            }
-            var mvpname = mvp.Name;
-            var steamid = mvp.SteamId;
+
+            var mvp = _g.PlayerList.OrderByDescending(player => player.Value.Kills).FirstOrDefault();
+            var mvpname = mvp.Value.Name;
+            var steamid = mvp.Value.SteamId;
             var steamlink = $"https://steamcommunity.com/profiles/{steamid}";
             DSLog.Log(1, $"Game ended! MVP: {mvpname}");
-            Task.Run(() => _webhook.GameEnd(mvp, steamlink));
+            Task.Run(() => _webhook.GameEnd(mvp.Value, steamlink));
             return HookResult.Continue;
         }
     }
