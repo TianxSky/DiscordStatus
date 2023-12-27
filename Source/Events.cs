@@ -1,5 +1,6 @@
 ﻿using CounterStrikeSharp.API;
 using CounterStrikeSharp.API.Core;
+using CounterStrikeSharp.API.Modules.Utils;
 using Microsoft.Extensions.Logging;
 
 namespace DiscordStatus
@@ -137,12 +138,10 @@ namespace DiscordStatus
                 _g.CtPlayersName.AddRange(crPlayerList);
             }
 
-            var mvp = _g.PlayerList.OrderByDescending(player => player.Value.Kills).FirstOrDefault();
-            var mvpname = mvp.Value.Name;
-            var steamid = mvp.Value.SteamId;
-            var steamlink = $"https://steamcommunity.com/profiles/{steamid}";
-            DSLog.Log(1, $"Game ended! MVP: {mvpname}");
-            Task.Run(() => _webhook.GameEnd(mvp.Value, steamlink));
+            var _teams = Utilities.FindAllEntitiesByDesignerName<CCSTeam>("cs_team_manager");
+            _chores.GetScore(_teams);
+            var mvp = _g.TScore > _g.CTScore ? _g.TPlayersName.FirstOrDefault() : _g.CtPlayersName.FirstOrDefault();
+            Task.Run(() => _webhook.GameEnd(mvp));
             return HookResult.Continue;
         }
     }

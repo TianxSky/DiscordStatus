@@ -15,7 +15,7 @@ namespace DiscordStatus
 
         Task RequestPlayers(string name);
 
-        Task GameEnd(PlayerInfo mvp, string steamlink);
+        Task GameEnd(string mvp);
 
         Task NewMap(string mapname, int playercounts);
     }

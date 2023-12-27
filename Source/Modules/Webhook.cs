@@ -214,7 +214,7 @@ namespace DiscordStatus
             }
         }
 
-        public async Task GameEnd(PlayerInfo mvp, string steamlink)
+        public async Task GameEnd(string mvp)
         {
             List<DiscordWebhookClient> webhookClients = CreateWebhookClients(WConfig.ScoreboardURL);
             foreach (DiscordWebhookClient webhookClient in webhookClients)
@@ -247,7 +247,7 @@ namespace DiscordStatus
                         .WithDescription($"```ansi\r\n\u001b[2;31mServer: {_g.ServerIP}\nGameID: {timestamp} \u001b[0m\r\n```Time: <t:{timestamp}:f>")
                         .AddField($"{EConfig.MapField}", $"```ansi\r\n\u001b[2;31m{_g.MapName}\u001b[0m\r\n```", inline: true)
                         .AddField(EConfig.OnlineField, $"```ansi\r\n\u001b[2;31m{_g.PlayerList.Count}\u001b[0m/\u001b[2;32m{_g.MaxPlayers}\u001b[0m\r\n```", inline: true)
-                        .AddField($"{EConfig.MVPField}", $"[{_chores.FormatStats(mvp)}]({steamlink})", inline: false)
+                        .AddField($"{EConfig.MVPField}", $"{mvp}", inline: false)
                         .AddField(EConfig.CTField.Replace("{SCORE}", _g.CTScore.ToString()), ctnames, inline: EConfig.PlayersInline)
                         .AddField(EConfig.TField.Replace("{SCORE}", _g.TScore.ToString()), tnames, inline: EConfig.PlayersInline)
                         .WithColor(_chores.GetEmbedColor())
