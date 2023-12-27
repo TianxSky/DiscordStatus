@@ -21,7 +21,6 @@ namespace DiscordStatus
 
         public string FormatStats(PlayerInfo playerinfo)
         {
-            DSLog.Log(0, $"Formatting {playerinfo.Name} stats using {_g.NameFormat}");
             var nameBuilder = new StringBuilder(_g.NameFormat);
             nameBuilder.Replace("{NAME}", playerinfo.Name);
             nameBuilder.Replace("{K}", playerinfo.Kills.ToString());
@@ -37,7 +36,6 @@ namespace DiscordStatus
             {
                 formattedName = $"[{formattedName}](https://steamcommunity.com/profiles/{playerinfo.SteamId})";
             }
-            DSLog.Log(0, $"Formatted {playerinfo.Name} stats to {formattedName}");
             return formattedName;
         }
 
@@ -95,7 +93,6 @@ namespace DiscordStatus
                 Task.Run(async () => playerInfo.Country = await _query.GetCountryCodeAsync(playerInfo.IpAddress).ConfigureAwait(false) ?? string.Empty);
             }
             _g.PlayerList[player.Slot] = playerInfo;
-            DSLog.Log(0, $"Player {playerInfo.Name} initialized");
         }
 
         public bool IsPlayerValid(CCSPlayerController? player)
