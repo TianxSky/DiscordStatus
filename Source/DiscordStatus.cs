@@ -121,9 +121,14 @@ namespace DiscordStatus
                         var ctPlayerList = players
                             .Where(kv => kv.Value != null && kv.Value.TeamID == 3)
                             .Select(kv => _chores.FormatStats(kv.Value));
+                        
+                        var specPlayerList = players
+                                           .Where(kv => kv.Value != null && kv.Value.TeamID == 1)
+                                           .Select(kv => _chores.FormatStats(kv.Value));
 
                         _g.TPlayersName.AddRange(tPlayerList);
                         _g.CtPlayersName.AddRange(ctPlayerList);
+                        _g.SpecPlayersName.AddRange(specPlayerList);
                     }
                 });
             });

@@ -112,31 +112,37 @@ namespace DiscordStatus
 
         public Embed CreateStatusEmbed()
         {
-            List<string> tplayersName = _g.TPlayersName;
-            List<string> ctplayersName = _g.CtPlayersName;
-            string tnames;
-            string ctnames;
+            List<string> tPlayersName = _g.TPlayersName;
+            List<string> ctPlayersName = _g.CtPlayersName;
+            List<string> specPlayersName = _g.SpecPlayersName;
+            string tNames;
+            string ctNames;
+            string specNames;
 
             if (_g.PlayerList.Count > 0)
             {
                 if (_g.HasCC)
                 {
-                    tnames = !tplayersName.Any() ? "ㅤ" : string.Join("\n", tplayersName);
-                    ctnames = !ctplayersName.Any() ? "ㅤ" : string.Join("\n", ctplayersName);
+                    tNames = !tPlayersName.Any() ? "ㅤ" : string.Join("\n", tPlayersName);
+                    ctNames = !ctPlayersName.Any() ? "ㅤ" : string.Join("\n", ctPlayersName);
+                    specNames = !ctPlayersName.Any() ? "ㅤ" : string.Join("\n", specPlayersName);
                 }
                 else
                 {
-                    ctnames = !ctplayersName.Any() ? "```ㅤ```" : $"```ansi\r\n\u001b[0;34m{string.Join("\n", ctplayersName)}\u001b[0m\r\n```";
-                    tnames = !tplayersName.Any() ? "```ㅤ```" : $"```ansi\r\n\u001b[0;33m{string.Join("\n", tplayersName)}\u001b[0m\r\n```";
+                    tNames = !tPlayersName.Any() ? "```ㅤ```" : $"```ansi\r\n\u001b[0;33m{string.Join("\n", tPlayersName)}\u001b[0m\r\n```";
+                    ctNames = !ctPlayersName.Any() ? "```ㅤ```" : $"```ansi\r\n\u001b[0;34m{string.Join("\n", ctPlayersName)}\u001b[0m\r\n```";
+                    specNames = !specPlayersName.Any() ? "```ㅤ```" : $"```ansi\r\n\u001b[0;33m{string.Join("\n", specPlayersName)}\u001b[0m\r\n```";
                 }
+                
                 EmbedBuilder builder = new EmbedBuilder()
                     .WithTitle(EConfig.Title)
                     .AddField($"{EConfig.MapField}", $"```ansi\r\n\u001b[2;31m{_g.MapName}\u001b[0m\r\n```", inline: true)
                     .AddField(EConfig.OnlineField, $"```ansi\r\n\u001b[2;31m{_g.PlayerList.Count}\u001b[0m/\u001b[2;32m{_g.MaxPlayers}\u001b[0m\r\n```", inline: true);
                 _ = EConfig.PlayersInline ? builder.AddField("ㅤ", "​─────────────────────────────────────") : null;
                 _ = builder
-                    .AddField(EConfig.CTField.Replace("{SCORE}", _g.CTScore.ToString()), ctnames, inline: EConfig.PlayersInline)
-                    .AddField(EConfig.TField.Replace("{SCORE}", _g.TScore.ToString()), tnames, inline: EConfig.PlayersInline)
+                    .AddField(EConfig.CTField.Replace("{SCORE}", _g.CTScore.ToString()), ctNames, inline: EConfig.PlayersInline)
+                    .AddField(EConfig.TField.Replace("{SCORE}", _g.TScore.ToString()), tNames, inline: EConfig.PlayersInline)
+                    .AddField(EConfig.SpecField, specNames, inline: EConfig.PlayersInline)
                     .AddField("ㅤ", _chores.IsURLValid(GConfig.PHPURL) ? $"[**`connect {_g.ServerIP}`**]({_g.ConnectURL})ㅤ{EConfig.JoinHere}" : $"**`connect {_g.ServerIP}`**ㅤ{EConfig.JoinHere}")
                     .WithColor(_chores.GetEmbedColor())
                     .WithCurrentTimestamp();

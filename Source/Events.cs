@@ -130,12 +130,17 @@ namespace DiscordStatus
                     .Where(kv => kv.Value != null && kv.Value.TeamID == 2)
                     .Select(kv => _chores.FormatStats(kv.Value));
 
-                var crPlayerList = players
+                var ctPlayerList = players
                     .Where(kv => kv.Value != null && kv.Value.TeamID == 3)
                     .Select(kv => _chores.FormatStats(kv.Value));
+                
+                var specPlayerList = players
+                                   .Where(kv => kv.Value != null && kv.Value.TeamID == 1)
+                                   .Select(kv => _chores.FormatStats(kv.Value));
 
                 _g.TPlayersName.AddRange(tPlayerList);
-                _g.CtPlayersName.AddRange(crPlayerList);
+                _g.CtPlayersName.AddRange(ctPlayerList);
+                _g.SpecPlayersName.AddRange(specPlayerList);
             }
 
             var _teams = Utilities.FindAllEntitiesByDesignerName<CCSTeam>("cs_team_manager");
