@@ -64,6 +64,9 @@ namespace DiscordStatus
 
         [JsonPropertyName("TField")]
         public string TField { get; set; } = " T :ㅤ{SCORE}";
+        
+        [JsonPropertyName("TField")]
+        public string SpecField { get; set; } = " Spec :ㅤ{SCORE}";
 
         [JsonPropertyName("MVPField")]
         public string MVPField { get; set; } = " 👑ㅤMVP ";
