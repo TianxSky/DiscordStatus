@@ -142,7 +142,7 @@ namespace DiscordStatus
                 _ = builder
                     .AddField(EConfig.CTField.Replace("{SCORE}", _g.CTScore.ToString()), ctNames, inline: EConfig.PlayersInline)
                     .AddField(EConfig.TField.Replace("{SCORE}", _g.TScore.ToString()), tNames, inline: EConfig.PlayersInline)
-                    .AddField(EConfig.SpecField.Replace("{SCORE}", _g.TScore.ToString()), specNames, inline: EConfig.PlayersInline)
+                    .AddField(EConfig.SpecField, specNames, inline: EConfig.PlayersInline)
                     .AddField("ㅤ", _chores.IsURLValid(GConfig.PHPURL) ? $"[**`connect {_g.ServerIP}`**]({_g.ConnectURL})ㅤ{EConfig.JoinHere}" : $"**`connect {_g.ServerIP}`**ㅤ{EConfig.JoinHere}")
                     .WithColor(_chores.GetEmbedColor())
                     .WithCurrentTimestamp();
