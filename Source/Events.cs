@@ -43,10 +43,10 @@ namespace DiscordStatus
             else
             {
                 DSLog.Log(1, $"Map {_g.MapName} changed to {mapName}!");
+                _g.MapName = mapName;
                 if (!_g.WConfig.NewMapNotification) return;
                 var playercounts = Utilities.GetPlayers().Where(_chores.IsPlayerValid).Count();
                 _webhook.NewMap(mapName, playercounts);
-                _g.MapName = mapName;
             }
         }
 

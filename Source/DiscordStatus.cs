@@ -26,7 +26,8 @@ namespace DiscordStatus
         {
             Server.NextFrame(() =>
             {
-                _g.MapName = NativeAPI.GetMapName();
+                if (string.IsNullOrEmpty(_g.MapName))
+                    _g.MapName = NativeAPI.GetMapName();
             });
             RegisterListeners();
             if (!hotReload)
