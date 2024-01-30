@@ -114,6 +114,7 @@ namespace DiscordStatus
         {
             _g.TPlayersName.Clear();
             _g.CtPlayersName.Clear();
+            _g.SpecPlayersName.Clear();
             _g.PlayerList = _g.PlayerList.OrderByDescending(x => x.Value.Kills).ToDictionary(x => x.Key, x => x.Value);
         }
 
